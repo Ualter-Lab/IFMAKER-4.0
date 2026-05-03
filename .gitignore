@@ -1,0 +1,29 @@
+# --- Python & Venv ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+
+# --- Banco de Dados Local (SQLite) ---
+instance/
+*.db
+
+# --- Docker ---
+# Você quer versionar o Dockerfile e o docker-compose.yml, 
+# mas não os logs ou dados persistidos por volumes se eles criarem pastas locais.
+.docker/
+
+# --- Variáveis de Ambiente (SEGURANÇA) ---
+# Nunca suba senhas ou chaves do Flask/Postgres
+.env
+.flaskenv
+
+# --- Sistema e IDEs (MacBook Pro) ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- Logs ---
+*.log

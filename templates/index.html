@@ -144,13 +144,14 @@
   .voluntario .monitor-avatar { background: var(--secondary); }
 
   /* ===== FORMULÁRIO ===== */
-  .form-container {
+.form-container {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: clamp(20px, 5vw, 40px);
-    max-width: 850px;
-  }
+    max-width: 100vw;
+    margin: 0 auto;
+}
   .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .equip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
   
@@ -357,24 +358,42 @@
 </section>
 
 <section class="section" id="agendamento">
-  <div class="section-header"><h2>Solicitar Uso</h2></div>
+  <div class="section-header">
+      <div class="eyebrow">Solicitação</div>
+      <h2>Agendar Uso</h2>
+  </div>
   <div class="form-container">
+    <!-- Primeira Linha: Nome e Intervalo de Datas -->
     <div class="grid-2col">
         <div style="display:flex; flex-direction:column; gap:8px;">
-            <label>Nome</label>
-            <input type="text" id="nomeInput" style="padding:12px; border:1px solid var(--border); border-radius:8px;">
+            <label>Nome Completo</label>
+            <input type="text" id="nomeInput" placeholder="Seu nome" style="padding:12px; border:1px solid var(--border); border-radius:8px;">
         </div>
-        <div>
-        <label for="objetoInput">Objeto de Uso</label>
-        <br>
-        <textarea id="objetoInput" style="padding:12px;     border:1px solid var(--border); border-radius:8px; width: 100%; height: 30vh; resize: vertical;"></textarea>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <label>Data</label>
-            <input type="date" id="dataInput" style="padding:12px; border:1px solid var(--border); border-radius:8px;">
+        
+        <!-- Sub-grid para as duas datas -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label>De:</label>
+                <input type="date" id="dataInicio" style="padding:12px; border:1px solid var(--border); border-radius:8px;">
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label>Até:</label>
+                <input type="date" id="dataFim" style="padding:12px; border:1px solid var(--border); border-radius:8px;">
+            </div>
         </div>
     </div>
-    <button class="btn-primary" style="margin-top:20px; width:100%;" onclick="submitBooking()">Enviar Solicitação</button>
+
+    <!-- Segunda Linha: Objeto de Uso -->
+    <div style="margin-top: 20px; display:flex; flex-direction:column; gap:8px;">
+        <label for="objetoInput">Objeto de Uso (Justificativa/Projeto)</label>
+        <textarea id="objetoInput" placeholder="Descreva o que será feito..." style="padding:12px; border:1px solid var(--border); border-radius:8px; width: 100%; height: 20vh; resize: vertical;"></textarea>
+    </div>
+
+    <div style="display: flex; justify-content: center; width: 100%;">
+        <button class="btn-primary" style="margin-top:24px; width:30%; min-width: 200px;" onclick="submitBooking()">
+            Enviar Solicitação via Portal
+        </button>
+    </div>
   </div>
 </section>
 
@@ -399,11 +418,43 @@ function showSection(id) {
 
 function submitBooking() {
   const nome = document.getElementById('nomeInput').value;
-  if(!nome) {
-    showToast("❌ Preencha seu nome!");
+  const dataInicio = document.getElementById('dataInicio').value;
+  const dataFim = document.getElementById('dataFim').value;
+  const objeto = document.getElementById('objetoInput').value;
+
+  if(!nome || !dataInicio || !dataFim || !objeto) {
+    showToast("❌ Preencha todos os campos!");
     return;
   }
-  showToast("✅ Solicitação enviada com sucesso!");
+
+  // Criando o objeto com os dados
+  const dados = {
+    nome: nome,
+    data_inicio: dataInicio,
+    data_fim: dataFim,
+    objeto_uso: objeto
+  };
+
+  // Enviando para o Flask
+  fetch('/agendamento', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(dados)
+  })
+  .then(response => {
+    if (response.ok) {
+      showToast("✅ Solicitação enviada com sucesso!");
+      // Limpar formulário se desejar
+    } else {
+      showToast("❌ Erro ao enviar solicitação.");
+    }
+  })
+  .catch(error => {
+    console.error('Erro:', error);
+    showToast("❌ Erro de conexão com o servidor.");
+  });
 }
 
 function showToast(msg) {
