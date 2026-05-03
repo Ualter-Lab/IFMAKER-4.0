@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IFMAKER & LAB 4.0 — IFAL Marechal Deodoro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #16a34a;
+    --primary-hover: #15803d;
+    --primary-light: #dcfce7;
+    --secondary: #2563eb;
+    --secondary-light: #dbeafe;
+    --bg-color: #f8fafc;
+    --surface: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ===== NAV RESPONSIVO ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5%;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: max-content; }
+  .logo-badge { background: var(--primary); color: white; font-weight: 700; font-size: 11px; padding: 4px 8px; border-radius: 4px; }
+  .logo-text { font-weight: 700; font-size: 16px; color: var(--text-main); }
+
+  /* Menu Mobile Icon */
+  .menu-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-main); }
+
+  .nav-links { display: flex; align-items: center; gap: 5px; list-style: none; }
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    transition: 0.2s;
+    white-space: nowrap;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--primary); background: var(--primary-light); }
+  .trello-btn { background: #0052CC !important; color: white !important; }
+
+  /* ===== LAYOUT GERAL ===== */
+  .section {
+    display: none;
+    padding: 100px 5% 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+  .section.active { display: block; animation: fadeIn 0.4s ease-out; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header h2 { font-size: clamp(24px, 5vw, 36px); font-weight: 700; margin-bottom: 10px; }
+
+  /* ===== HERO (HOME) ===== */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 60px;
+  }
+  .hero h1 { font-size: clamp(32px, 6vw, 56px); font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+  .hero h1 span { color: var(--primary); }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* ===== GRIDS RESPONSIVOS ===== */
+  .labs-grid, .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  .lab-card, .rule-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    height: 100%;
+  }
+
+  /* ===== ESCALA (O DESAFIO DO MOBILE) ===== */
+  .schedule-wrapper {
+    overflow-x: auto; /* Permite rolar a tabela no celular */
+    margin-top: 20px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+  }
+
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(5, 200px); /* Largura mínima para não esmagar */
+    background: var(--border);
+    gap: 1px;
+  }
+
+  .sg-header, .sg-shift { background: #f1f5f9; padding: 15px; font-weight: 600; text-align: center; font-size: 13px; }
+  .sg-cell { background: var(--surface); padding: 10px; display: flex; flex-direction: column; gap: 5px; min-height: 120px; }
+  
+  .monitor-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--primary-light); color: var(--primary-hover);
+    padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  }
+  .monitor-chip.voluntario { background: var(--secondary-light); color: var(--secondary); }
+  .monitor-avatar { width: 20px; height: 20px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; }
+  .voluntario .monitor-avatar { background: var(--secondary); }
+
+  /* ===== FORMULÁRIO ===== */
+  .form-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: clamp(20px, 5vw, 40px);
+    max-width: 850px;
+  }
+  .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .equip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+  
+  .btn-primary, .btn-secondary {
+    padding: 12px 24px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none; transition: 0.2s;
+    text-align: center;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-secondary { background: white; border: 1px solid var(--border); }
+
+  /* ===== TOAST ===== */
+  #toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px;
+    z-index: 2000; transition: 0.3s; opacity: 0; text-align: center; width: max-content; max-width: 90vw;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ===== MEDIA QUERIES (O CORAÇÃO DA RESPONSIVIDADE) ===== */
+  @media (max-width: 992px) {
+    .hero { grid-template-columns: 1fr; text-align: center; }
+    .hero-desc { margin: 0 auto 30px; }
+    .hero-actions { justify-content: center; }
+  }
+
+  @media (max-width: 768px) {
+    .menu-toggle { display: block; }
+    .nav-links {
+      position: absolute; top: 70px; left: 0; right: 0;
+      background: white; flex-direction: column; padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: none; /* Escondido por padrão no mobile */
+    }
+    .nav-links.open { display: flex; }
+    .nav-links li { width: 100%; }
+    .nav-links a { display: block; width: 100%; text-align: center; padding: 15px; }
+    
+    .grid-2col { grid-template-columns: 1fr; }
+    .section { padding-top: 90px; }
+  }
+
+  @media (max-width: 480px) {
+    .logo-text { font-size: 14px; }
+    .hero h1 { font-size: 32px; }
+    .lab-card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#" onclick="showSection('home')">
+    <div class="logo-badge">IFAL</div>
+    <div class="logo-text">IFMAKER & 4.0</div>
+  </a>
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  <ul class="nav-links" id="navLinks">
+    <li><a onclick="showSection('home')" class="active" id="nav-home">Home</a></li>
+    <li><a onclick="showSection('regras')" id="nav-regras">Regulamento</a></li>
+    <li><a onclick="showSection('monitoria')" id="nav-monitoria">Monitores</a></li>
+    <li><a onclick="showSection('agendamento')" id="nav-agendamento">Agendamentos</a></li>
+    <li><a href="https://trello.com" target="_blank" class="trello-btn">Trello</a></li>
+  </ul>
+</nav>
+
+<!-- Seção Home -->
+<section class="section active" id="home">
+  <div class="hero">
+    <div>
+      <div style="font-family: var(--font-mono); color: var(--primary); font-size: 13px; margin-bottom: 10px;">CAMPUS MARECHAL DEODORO</div>
+      <h1>Hub de <span>Inovação</span> & Cultura Maker</h1>
+      <p class="hero-desc">Espaços de prototipagem e fabricação digital para transformar ideias em projetos reais.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showSection('agendamento')">Agendar Agora</button>
+        <button class="btn-secondary" onclick="showSection('regras')">Ver Regras</button>
+      </div>
+    </div>
+    <div style="background: white; padding: 30px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div><div style="font-size: 28px; font-weight: 800; color: var(--primary);">12</div><small>Monitores</small></div>
+        <div><div style="font-size: 28px; font-weight: 800; color: var(--primary);">02</div><small>Laboratórios</small></div>
+        <div style="grid-column: span 2;"><div style="font-size: 28px; font-weight: 800; color: var(--primary);">40h</div><small>Atendimento/Semana</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="labs-grid">
+    <div class="lab-card">
+      <h3>Espaço IFMAKER</h3>
+      <p>Corte a laser, Impressão 3D e eletrônica básica.</p>
+    </div>
+    <div class="lab-card">
+      <h3>Laboratório 4.0</h3>
+      <p>IoT, Robótica avançada e sistemas inteligentes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Seção Escala (Atualizada conforme imagem) -->
+<section class="section" id="monitoria">
+  <div class="section-header">
+    <div class="eyebrow">Gestão de Equipe</div>
+    <h2>Escala Semanal</h2>
+    <p>Verifique a disponibilidade de atendimento. Bolsistas estão em verde e voluntários em azul.</p>
+  </div>
+  
+  <div class="schedule-wrapper">
+    <div class="schedule-grid">
+      <div class="sg-header">Turno</div>
+      <div class="sg-header">Segunda</div>
+      <div class="sg-header">Terça</div>
+      <div class="sg-header">Quarta</div>
+      <div class="sg-header">Quinta</div>
+      <div class="sg-header">Sexta</div>
+
+      <!-- MANHÃ -->
+      <div class="sg-shift">7:20 às 11:00</div>
+      
+      <!-- Segunda Manhã -->
+      <div class="sg-cell">
+        <div class="monitor-chip"><div class="monitor-avatar">LB</div>Layla Beatriz</div>
+        <div class="monitor-chip"><div class="monitor-avatar">JG</div>João Guilherme</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">DN</div>Daniel Silva</div>
+      </div>
+      
+      <!-- Terça Manhã -->
+      <div class="sg-cell">
+        <div class="monitor-chip"><div class="monitor-avatar">LB</div>Layla Beatriz</div>
+        <div class="monitor-chip"><div class="monitor-avatar">JG</div>João Guilherme</div>
+        <div class="monitor-chip"><div class="monitor-avatar">JP</div>João Pedro</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">SS</div>Sarah Sophia</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">MS</div>Maria Sofia</div>
+      </div>
+      
+      <!-- Quarta Manhã -->
+      <div class="sg-cell">
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">SS</div>Sarah Sophia</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">MS</div>Maria Sofia</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">DN</div>Daniel Silva</div>
+      </div>
+      
+      <!-- Quinta Manhã -->
+      <div class="sg-cell">
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">SS</div>Sarah Sophia</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">MS</div>Maria Sofia</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">DN</div>Daniel Silva</div>
+      </div>
+      
+      <!-- Sexta Manhã -->
+      <div class="sg-cell">
+        <div class="monitor-chip"><div class="monitor-avatar">LB</div>Layla Beatriz</div>
+        <div class="monitor-chip"><div class="monitor-avatar">JG</div>João Guilherme</div>
+        <div class="monitor-chip"><div class="monitor-avatar">JP</div>João Pedro</div>
+      </div>
+
+      <!-- TARDE -->
+      <div class="sg-shift">13:00 às 17:00</div>
+      
+      <!-- Segunda Tarde -->
+      <div class="sg-cell">
+        <div class="monitor-chip"><div class="monitor-avatar">AG</div>Arthur Guilherme</div>
+        <div class="monitor-chip"><div class="monitor-avatar">MB</div>Maria Beatriz</div>
+      </div>
+      
+      <!-- Terça Tarde -->
+      <div class="sg-cell">
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">FV</div>Flávia Victória</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">CA</div>Cezar Augusto</div>
+        <div class="monitor-chip"><div class="monitor-avatar">WA</div>Walter Avelino</div>
+      </div>
+      
+      <!-- Quarta Tarde -->
+      <div class="sg-cell">
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">FV</div>Flávia Victória</div>
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">CA</div>Cezar Augusto</div>
+        <div class="monitor-chip"><div class="monitor-avatar">MB</div>Maria Beatriz</div>
+        <div class="monitor-chip"><div class="monitor-avatar">AG</div>Arthur Guilherme</div>
+      </div>
+      
+      <!-- Quinta Tarde -->
+      <div class="sg-cell">
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">FV</div>Flávia Victória</div>
+        <div class="monitor-chip"><div class="monitor-avatar">AG</div>Arthur Guilherme</div>
+        <div class="monitor-chip"><div class="monitor-avatar">WA</div>Walter Avelino</div>
+      </div>
+      
+      <!-- Sexta Tarde -->
+      <div class="sg-cell">
+        <div class="monitor-chip voluntario"><div class="monitor-avatar">CA</div>Cezar Augusto</div>
+        <div class="monitor-chip"><div class="monitor-avatar">MB</div>Maria Beatriz</div>
+        <div class="monitor-chip"><div class="monitor-avatar">WA</div>Walter Avelino</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Outras seções simplificadas para o exemplo -->
+<section class="section" id="regras">
+    <div class="section-header"><h2>Regulamento</h2></div>
+    <div class="rules-grid">
+        <div class="rule-box"><h3>Agendamento</h3><p>Mínimo de 48h de antecedência pelo sistema.</p></div>
+        <div class="rule-box"><h3>Uso Consciente</h3><p>Zelar pelos equipamentos e manter a limpeza.</p></div>
+    </div>
+</section>
+
+<section class="section" id="agendamento">
+  <div class="section-header"><h2>Solicitar Uso</h2></div>
+  <div class="form-container">
+    <div class="grid-2col">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <label>Nome</label>
+            <input type="text" id="nomeInput" style="padding:12px; border:1px solid var(--border); border-radius:8px;">
+        </div>
+        <div>
+        <label for="objetoInput">Objeto de Uso</label>
+        <br>
+        <textarea id="objetoInput" style="padding:12px;     border:1px solid var(--border); border-radius:8px; width: 100%; height: 30vh; resize: vertical;"></textarea>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <label>Data</label>
+            <input type="date" id="dataInput" style="padding:12px; border:1px solid var(--border); border-radius:8px;">
+        </div>
+    </div>
+    <button class="btn-primary" style="margin-top:20px; width:100%;" onclick="submitBooking()">Enviar Solicitação</button>
+  </div>
+</section>
+
+<div id="toast">Mensagem aqui</div>
+
+<script>
+function toggleMenu() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const navItem = document.getElementById('nav-' + id);
+  if(navItem) navItem.classList.add('active');
+  
+  // Fecha menu mobile ao clicar
+  document.getElementById('navLinks').classList.remove('open');
+  window.scrollTo(0, 0);
+}
+
+function submitBooking() {
+  const nome = document.getElementById('nomeInput').value;
+  if(!nome) {
+    showToast("❌ Preencha seu nome!");
+    return;
+  }
+  showToast("✅ Solicitação enviada com sucesso!");
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+
+</body>
+</html>
