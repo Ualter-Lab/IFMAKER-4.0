@@ -1,5 +1,6 @@
 from . import db
 from datetime import datetime
+from backend import create_app
 
 class Agendamento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
