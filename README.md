@@ -16,7 +16,7 @@ Sistema de gerenciamento e reserva de equipamentos para o laboratório IFMAKER d
 *   **Backend:** Python 3.14 com Flask.
 *   **Banco de Dados:** SQLite (Desenvolvimento) / PostgreSQL (Produção).
 *   **ORM:** SQLAlchemy para manipulação de dados.
-*   **Frontend:** HTML5, CSS3 (Tailwind CSS) e JavaScript (Fetch API).
+*   **Frontend:** HTML5, CSS3 e JavaScript (Fetch API).
 *   **Containerização:** Docker & Docker Compose.
 
 ## 📦 Como rodar o projeto
