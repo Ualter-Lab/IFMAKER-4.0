@@ -37,7 +37,8 @@ O projeto segue estritamente o padrão de organização do Flask:
 meu_projeto/
 │
 ├── app.py                  # Código-fonte Python (Rotas, Modelos SQL, CLI)
-├── ifmaker.db              # Banco de dados SQLite (Gerado automaticamente)
+├── instance/              # Pasta exclusiva para o banco de dados em sqlite
+│   └── ifmaker.db               # Banco de dados SQLite (Gerado automaticamente)
 ├── requirements.txt        # Arquivo de dependências do Python
 │
 └── templates/              # Pasta exclusiva para os arquivos HTML
