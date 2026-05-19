@@ -4,12 +4,15 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
+load_dotenv()
+
 # Configurações do App
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'sua_chave_secreta_super_segura_aqui')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ifmaker.db'
+app.config['SECRET_KEY'] = os.getenv('KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URL_DATABASE')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -96,6 +99,9 @@ def index():
     items_inventario = ItemInventario.query.all()
     lista_monitores = Usuario.query.filter_by(role='monitor').all()
     horarios_escala = HorarioMonitoria.query.all()
+
+    allagendamentos =  db.session.query(Agendamento.id).count()
+    allequipamentos = db.session.query(ItemInventario.id).count()
     
     # Agendamentos para exibição no Dashboard do Monitor/Admin
     todos_agendamentos = Agendamento.query.order_by(Agendamento.data_reserva.desc()).all() if not current_user.is_anonymous and current_user.role in ['monitor', 'admin'] else []
@@ -105,7 +111,9 @@ def index():
         inventario=items_inventario, 
         monitores=lista_monitores,
         horarios=horarios_escala,
-        agendamentos=todos_agendamentos
+        agendamentos=todos_agendamentos,
+        allagendamentos = allagendamentos,
+        allequipamentos = allequipamentos
     )
 
 
@@ -228,14 +236,26 @@ def add_monitor():
     nome = input("Nome Completo: ").strip()
     email = input("E-mail Institucional: ").strip()
     username = input("Nome de Utilizador (Username para Login): ").strip()
+
+    matricula = None
+    you_have_matricula = input("Você tem número de matrícula? (s/n): ").strip().lower()
+    if you_have_matricula == "s" :
+        matricula = input("Número de matrícula: ")
     senha = input("Palavra-passe (Senha): ").strip()
     
     is_vol_input = input("É monitor Voluntário? (s/n): ").strip().lower()
     is_voluntario = True if is_vol_input == 's' else False
 
-    # Validação básica para não duplicar utilizadores
-    if Usuario.query.filter((Usuario.email == email) | (Usuario.username == username)).first():
-        print("\n❌ Erro: Já existe um monitor com este E-mail ou Username!")
+    usuario_existente = Usuario.query.filter(
+        (Usuario.email == email) | (Usuario.username == username)
+    ).first()
+
+    matricula_existente = False
+    if matricula:
+        matricula_existente = Usuario.query.filter(Usuario.matricula == matricula).first()
+
+    if usuario_existente or matricula_existente:
+        print("\n❌ Erro: Já existe um monitor com este E-mail, Username ou matrícula!")
         return
 
     try:
@@ -243,7 +263,8 @@ def add_monitor():
         novo_monitor = Usuario(
             nome=nome, 
             email=email, 
-            username=username, 
+            username=username,
+            matricula=matricula,
             role='monitor', 
             is_voluntario=is_voluntario
         )
@@ -323,6 +344,28 @@ def editar_inventario(item_id):
         flash("Erro ao atualizar o item. Tente novamente.", "danger")
     
     return redirect(url_for('index'))
+
+@app.route('/inventario/adicionar', methods=['POST'])
+def adicionar_inventario():
+    nome = request.form.get('nome')
+    quantidade = request.form.get('quantidade')
+    descricao = request.form.get('descricao')
+    status = request.form.get('status')
+    categoria = request.form.get('categoria', 'Geral')
+
+    novo_item = ItemInventario(
+        nome=nome,
+        quantidade=int(quantidade),
+        descricao=descricao,
+        status=status,
+        categoria=categoria
+    )
+    
+    db.session.add(novo_item)
+    db.session.commit()
+    
+    # Redireciona de volta para a página do painel/gerenciamento
+    return redirect(url_for('nome_da_sua_rota_do_painel'))
 
 
 if __name__ == '__main__':

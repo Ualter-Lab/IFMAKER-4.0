@@ -1718,7 +1718,7 @@
 
       <div class="stats-bar">
         <div class="stat-item">
-          <div class="stat-num">12+</div>
+          <div class="stat-num">{{ allequipamentos }}</div>
           <div class="stat-label">Equipamentos</div>
         </div>
         <div class="stat-item">
@@ -1726,7 +1726,7 @@
           <div class="stat-label">Monitores</div>
         </div>
         <div class="stat-item">
-          <div class="stat-num">300+</div>
+          <div class="stat-num">{{ allagendamentos }}</div>
           <div class="stat-label">Alunos Atendidos</div>
         </div>
         <div class="stat-item">
@@ -2600,47 +2600,76 @@
         </div>
       </div>
 
-      <div class="card card-padded" style="margin-top: 20px;">
-        <h3 style="margin-bottom: 20px;">Gerenciar Inventário</h3>
-        <div class="schedule-wrapper">
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                <thead>
-                    <tr style="background: var(--bg-subtle); text-align: left;">
-                        <th style="padding: 12px;">Item</th>
-                        <th style="padding: 12px;">Qtd</th>
-                        <th style="padding: 12px;">Status</th>
-                        <th style="padding: 12px;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in inventario %}
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <form action="{{ url_for('editar_inventario', item_id=item.id) }}" method="POST">
-                            <td style="padding: 10px;">
-                                <input type="text" name="nome" value="{{ item.nome }}" class="form-control" style="padding: 5px;">
-                            </td>
-                            <td style="padding: 10px; width: 80px;">
-                                <input type="number" name="quantidade" value="{{ item.quantidade }}" class="form-control" style="padding: 5px;">
-                            </td>
-                            <td style="padding: 10px;">
-                                <select name="status" class="form-control" style="padding: 5px;">
-                                    <option value="ok" {% if item.status == 'ok' %}selected{% endif %}>Disponível</option>
-                                    <option value="busy" {% if item.status == 'busy' %}selected{% endif %}>Em Uso</option>
-                                    <option value="unavail" {% if item.status == 'unavail' %}selected{% endif %}>Indisponível</option>
-                                </select>
-                            </td>
-                            <td style="padding: 10px;">
-                                <button type="submit" class="btn-primary" style="padding: 5px 12px; font-size: 11px;">Salvar</button>
-                            </td>
-                            <input type="hidden" name="categoria" value="{{ item.categoria }}">
-                            <input type="hidden" name="descricao" value="{{ item.descricao }}">
-                        </form>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<div class="card card-padded" style="margin-top: 20px;">
+    <h3 style="margin-bottom: 20px;">Gerenciar Inventário</h3>
+
+    <div style="background: var(--bg-subtle); padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border);">
+        <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 14px;">Adicionar Novo Item</h4>
+        <form action="{{ url_for('adicionar_inventario') }}" method="POST" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 2; min-width: 150px;">
+                <label style="font-size: 11px; display: block; margin-bottom: 4px;">Nome do Item</label>
+                <input type="text" name="nome" placeholder="Ex: Projetor" class="form-control" style="padding: 5px; width: 100%;" required>
+            </div>
+            <div style="flex: 1; min-width: 80px;">
+                <label style="font-size: 11px; display: block; margin-bottom: 4px;">Qtd</label>
+                <input type="number" name="quantidade" value="1" min="0" class="form-control" style="padding: 5px; width: 100%;" required>
+            </div>
+            <div style="flex: 3; min-width: 200px;">
+                <label style="font-size: 11px; display: block; margin-bottom: 4px;">Descrição</label>
+                <input type="text" name="descricao" placeholder="Ex: Sala de reuniões Bloco A" class="form-control" style="padding: 5px; width: 100%;">
+            </div>
+            <div style="flex: 1; min-width: 120px;">
+                <label style="font-size: 11px; display: block; margin-bottom: 4px;">Status</label>
+                <select name="status" class="form-control" style="padding: 5px; width: 100%;">
+                    <option value="ok">Disponível</option>
+                    <option value="busy">Em Uso</option>
+                    <option value="unavail">Indisponível</option>
+                </select>
+            </div>
+            <input type="hidden" name="categoria" value="Geral"> <button type="submit" class="btn-primary" style="padding: 7px 15px; font-size: 12px; height: 32px;">Adicionar</button>
+        </form>
     </div>
+
+    <div class="schedule-wrapper">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+                <tr style="background: var(--bg-subtle); text-align: left;">
+                    <th style="padding: 12px;">Item</th>
+                    <th style="padding: 12px;">Qtd</th>
+                    <th style="padding: 12px;">Descrição</th> <th style="padding: 12px;">Status</th>
+                    <th style="padding: 12px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventario %}
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <form action="{{ url_for('editar_inventario', item_id=item.id) }}" method="POST">
+                        <td style="padding: 10px;">
+                            <input type="text" name="nome" value="{{ item.nome }}" class="form-control" style="padding: 5px;">
+                        </td>
+                        <td style="padding: 10px; width: 80px;">
+                            <input type="number" name="quantidade" value="{{ item.quantidade }}" class="form-control" style="padding: 5px;">
+                        </td>
+                        <td style="padding: 10px;"> <input type="text" name="descricao" value="{{ item.descricao or '' }}" class="form-control" style="padding: 5px; width: 100%;" placeholder="Sem descrição">
+                        </td>
+                        <td style="padding: 10px;">
+                            <select name="status" class="form-control" style="padding: 5px;">
+                                <option value="ok" {% if item.status == 'ok' %}selected{% endif %}>Disponível</option>
+                                <option value="busy" {% if item.status == 'busy' %}selected{% endif %}>Em Uso</option>
+                                <option value="unavail" {% if item.status == 'unavail' %}selected{% endif %}>Indisponível</option>
+                            </select>
+                        </td>
+                        <td style="padding: 10px;">
+                            <button type="submit" class="btn-primary" style="padding: 5px 12px; font-size: 11px;">Salvar</button>
+                        </td>
+                        <input type="hidden" name="categoria" value="{{ item.categoria }}">
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
       {% endif %} {% endif %}
     </section>
 
