@@ -427,6 +427,9 @@ def remover_monitor(monitor_id):
 with app.app_context():
     db.create_all()
 
+    if ItemInventario.query.count() == 0:
+        setup_inventario()
+
 
 if __name__ == '__main__':
     # Cria as tabelas caso não existam ao rodar diretamente
