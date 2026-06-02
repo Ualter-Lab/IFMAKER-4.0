@@ -365,7 +365,7 @@ def adicionar_inventario():
     db.session.commit()
     
     # Redireciona de volta para a página do painel/gerenciamento
-    return redirect(url_for('nome_da_sua_rota_do_painel'))
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
