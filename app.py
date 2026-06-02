@@ -20,6 +20,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+with app.app_context():
+    db.create_all()
+
 # Configuração do Controle de Sessão (Login)
 login_manager = LoginManager(app)
 login_manager.login_view = 'acesso' # Redireciona para a aba de acesso se não logado
@@ -369,6 +372,28 @@ def adicionar_inventario():
     
     # Redireciona de volta para a página do painel/gerenciamento
     return redirect(url_for('index'))
+
+@app.route('/setup-monitor-secreto')
+def setup_monitor_secreto():
+    with app.app_context():
+        db.create_all()
+
+        if Usuario.query.filter_by(username="admin").first():
+            return "Monitor/admin já existe"
+
+        monitor = Usuario(
+            nome="Administrador",
+            email="admin@ifmaker.com",
+            username="admin",
+            role="monitor",
+            is_voluntario=False
+        )
+        monitor.set_password("admin123")
+
+        db.session.add(monitor)
+        db.session.commit()
+
+        return "Monitor criado com sucesso"
 
 
 if __name__ == '__main__':
