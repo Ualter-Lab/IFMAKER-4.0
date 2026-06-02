@@ -10,6 +10,9 @@ app = Flask(__name__)
 
 load_dotenv()
 
+print("KEY =", os.getenv("KEY"))
+print("URL_DATABASE =", os.getenv("URL_DATABASE"))
+
 # Configurações do App
 app.config['SECRET_KEY'] = os.getenv('KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URL_DATABASE')
