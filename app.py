@@ -10,9 +10,6 @@ app = Flask(__name__)
 
 load_dotenv()
 
-print("KEY =", os.getenv("KEY"))
-print("URL_DATABASE =", os.getenv("URL_DATABASE"))
-
 # Configurações do App
 app.config['SECRET_KEY'] = os.getenv('KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URL_DATABASE')
@@ -370,27 +367,62 @@ def adicionar_inventario():
     # Redireciona de volta para a página do painel/gerenciamento
     return redirect(url_for('index'))
 
-@app.route('/setup-monitor-secreto')
-def setup_monitor_secreto():
-    with app.app_context():
-        db.create_all()
+@app.route('/monitor/adicionar', methods=['POST'])
+@login_required
+def adicionar_monitor():
+    if current_user.role not in ['monitor', 'admin']:
+        flash("Acesso negado.", "danger")
+        return redirect(url_for('index'))
 
-        if Usuario.query.filter_by(username="admin").first():
-            return "Monitor/admin já existe"
+    nome = request.form.get('nome')
+    email = request.form.get('email')
+    username = request.form.get('username')
+    senha = request.form.get('senha')
+    is_voluntario = request.form.get('is_voluntario') == 'sim'
 
-        monitor = Usuario(
-            nome="Administrador",
-            email="admin@ifmaker.com",
-            username="admin",
-            role="monitor",
-            is_voluntario=False
-        )
-        monitor.set_password("admin123")
+    if Usuario.query.filter((Usuario.email == email) | (Usuario.username == username)).first():
+        flash("Já existe um monitor com esse email ou username.", "danger")
+        return redirect(url_for('index'))
 
-        db.session.add(monitor)
-        db.session.commit()
+    novo_monitor = Usuario(
+        nome=nome,
+        email=email,
+        username=username,
+        role='monitor',
+        is_voluntario=is_voluntario
+    )
 
-        return "Monitor criado com sucesso"
+    novo_monitor.set_password(senha)
+
+    db.session.add(novo_monitor)
+    db.session.commit()
+
+    flash("Monitor cadastrado com sucesso!", "success")
+    return redirect(url_for('index'))
+
+
+@app.route('/monitor/remover/<int:monitor_id>', methods=['POST'])
+@login_required
+def remover_monitor(monitor_id):
+    if current_user.role not in ['monitor', 'admin']:
+        flash("Acesso negado.", "danger")
+        return redirect(url_for('index'))
+
+    monitor = Usuario.query.get_or_404(monitor_id)
+
+    if monitor.id == current_user.id:
+        flash("Você não pode remover a si mesmo.", "danger")
+        return redirect(url_for('index'))
+
+    if monitor.role != 'monitor':
+        flash("Esse usuário não é monitor.", "danger")
+        return redirect(url_for('index'))
+
+    db.session.delete(monitor)
+    db.session.commit()
+
+    flash("Monitor removido com sucesso!", "success")
+    return redirect(url_for('index'))
 
 with app.app_context():
     db.create_all()
