@@ -1,3 +1,4 @@
+psycopg2-binary
 blinker==1.9.0
 click==8.3.3
 Flask==3.1.3
