@@ -20,9 +20,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-with app.app_context():
-    db.create_all()
-
 # Configuração do Controle de Sessão (Login)
 login_manager = LoginManager(app)
 login_manager.login_view = 'acesso' # Redireciona para a aba de acesso se não logado
@@ -394,6 +391,9 @@ def setup_monitor_secreto():
         db.session.commit()
 
         return "Monitor criado com sucesso"
+
+with app.app_context():
+    db.create_all()
 
 
 if __name__ == '__main__':
