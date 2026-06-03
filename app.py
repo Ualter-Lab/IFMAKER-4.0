@@ -412,24 +412,28 @@ def adicionar_monitor():
 @app.route('/monitor/remover/<int:monitor_id>', methods=['POST'])
 @login_required
 def remover_monitor(monitor_id):
-    if current_user.role not in ['monitor', 'admin']:
-        flash("Acesso negado.", "danger")
+
+    # Apenas coordenadores e admins podem remover
+    if current_user.role not in ['coordenador', 'admin']:
+        flash("Apenas coordenadores e administradores podem remover membros.", "danger")
         return redirect(url_for('index'))
 
     monitor = Usuario.query.get_or_404(monitor_id)
 
+    # Impede remover a si mesmo
     if monitor.id == current_user.id:
         flash("Você não pode remover a si mesmo.", "danger")
         return redirect(url_for('index'))
 
-    if monitor.role != 'monitor':
-        flash("Esse usuário não é monitor.", "danger")
+    # Impede remover outro admin
+    if monitor.role == 'admin' and current_user.role != 'admin':
+        flash("Somente administradores podem remover outro administrador.", "danger")
         return redirect(url_for('index'))
 
     db.session.delete(monitor)
     db.session.commit()
 
-    flash("Monitor removido com sucesso!", "success")
+    flash("Membro removido com sucesso!", "success")
     return redirect(url_for('index'))
 
 with app.app_context():
