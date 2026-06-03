@@ -2763,10 +2763,18 @@
           <td>{{ monitor.email }}</td>
           <td>{{ monitor.username }}</td>
           <td>
-            {% if monitor.is_voluntario %}
-              Voluntário
+            {% if monitor.role == 'coordenador' %}
+              Coordenador
+            {% elif monitor.role == 'vice_coordenador' %}
+              Vice-coordenador
+            {% elif monitor.role == 'professor' %}
+              Professor orientador
+            {% elif monitor.role == 'admin' %}
+              Administrador
+            {% elif monitor.is_voluntario %}
+              Monitor voluntário
             {% else %}
-              Bolsista
+              Monitor bolsista
             {% endif %}
           </td>
 
