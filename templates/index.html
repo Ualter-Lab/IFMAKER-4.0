@@ -2733,8 +2733,6 @@
       <option value="monitor">Monitor bolsista</option>
       <option value="monitor_voluntario">Monitor voluntário</option>
       <option value="coordenador">Coordenador</option>
-      <option value="vice_coordenador">Vice-coordenador</option>
-      <option value="professor">Professor orientador</option>
       <option value="admin">Administrador</option>
     </select>
 
@@ -2765,10 +2763,6 @@
           <td>
             {% if monitor.role == 'coordenador' %}
               Coordenador
-            {% elif monitor.role == 'vice_coordenador' %}
-              Vice-coordenador
-            {% elif monitor.role == 'professor' %}
-              Professor orientador
             {% elif monitor.role == 'admin' %}
               Administrador
             {% elif monitor.is_voluntario %}
