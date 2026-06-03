@@ -378,7 +378,9 @@ def adicionar_monitor():
     email = request.form.get('email')
     username = request.form.get('username')
     senha = request.form.get('senha')
-    is_voluntario = request.form.get('is_voluntario') == 'sim'
+    role_recebida = request.form.get('role')
+    is_voluntario = role_recebida == 'monitor_voluntario'
+    role_final = 'monitor' if role_recebida == 'monitor_voluntario' else role_recebida
 
     if Usuario.query.filter((Usuario.email == email) | (Usuario.username == username)).first():
         flash("Já existe um monitor com esse email ou username.", "danger")
@@ -388,7 +390,7 @@ def adicionar_monitor():
         nome=nome,
         email=email,
         username=username,
-        role='monitor',
+        role=role_final,
         is_voluntario=is_voluntario
     )
 
