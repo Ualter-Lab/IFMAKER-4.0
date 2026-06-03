@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
+from Flask_mail import Mail, Message # type: ignore
 
 app = Flask(__name__)
 
@@ -14,6 +15,14 @@ load_dotenv()
 app.config['SECRET_KEY'] = os.getenv('KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URL_DATABASE')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+mail = Mail(app)
 
 db = SQLAlchemy(app)
 
@@ -83,6 +92,43 @@ class Agendamento(db.Model):
     
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
 
+def enviar_notificacao_demanda(agendamento):
+
+    staffs = Usuario.query.filter(
+        Usuario.role.in_([
+            'monitor',
+            'coordenador',
+            'admin'
+        ])
+    ).all()
+
+    destinatarios = [
+        staff.email
+        for staff in staffs
+        if staff.email
+    ]
+
+    if not destinatarios:
+        return
+
+    msg = Message(
+        subject='Nova demanda no IFMaker',
+        recipients=destinatarios
+    )
+
+    msg.body = f"""
+Nova demanda recebida.
+
+Aluno: {agendamento.usuario.nome}
+Equipamento: {agendamento.equipamento}
+Data: {agendamento.data_reserva}
+Horário: {agendamento.horario_slot}
+Projeto: {agendamento.projeto_vinculo}
+
+Acesse o sistema para aprovar ou recusar.
+"""
+
+    mail.send(msg)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -135,7 +181,7 @@ def login():
     else:
         username = request.form.get('username')
         senha = request.form.get('senha')
-        user = Usuario.query.filter_by(username=username).filter(Usuario.role.in_(['monitor', 'admin'])).first()
+        user = Usuario.query.filter_by(username=username).filter(Usuario.role.in_(['monitor', 'coordenador', 'admin'])).first()
 
     if user and user.check_password(senha):
         login_user(user)
@@ -208,8 +254,16 @@ def api_agendar():
     
     db.session.add(novo_agendamento)
     db.session.commit()
-    
-    return jsonify({'success': True, 'message': 'Solicitação de agendamento enviada com sucesso!'})
+
+    try:
+        enviar_notificacao_demanda(novo_agendamento)
+    except Exception as e:
+        print("ERRO EMAIL:", e)
+
+    return jsonify({
+        'success': True,
+        'message': 'Solicitação de agendamento enviada com sucesso!'
+    })
 
 
 # Gerenciamento de Agendamento pelos Monitores (Aprovar/Recusar)
