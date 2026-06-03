@@ -2729,9 +2729,13 @@
     <input type="text" name="username" placeholder="Username" required>
     <input type="password" name="senha" placeholder="Senha" required>
 
-    <select name="is_voluntario">
-      <option value="nao">Monitor bolsista</option>
-      <option value="sim">Monitor voluntário</option>
+    <select name="role">
+      <option value="monitor">Monitor bolsista</option>
+      <option value="monitor_voluntario">Monitor voluntário</option>
+      <option value="coordenador">Coordenador</option>
+      <option value="vice_coordenador">Vice-coordenador</option>
+      <option value="professor">Professor orientador</option>
+      <option value="admin">Administrador</option>
     </select>
 
     <button type="submit" class="btn-primary">
