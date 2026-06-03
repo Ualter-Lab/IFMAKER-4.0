@@ -97,7 +97,13 @@ def load_user(user_id):
 def index():
     # Coleta de dados dinâmica para renderizar no painel principal
     items_inventario = ItemInventario.query.all()
-    lista_monitores = Usuario.query.filter_by(role='monitor').all()
+    lista_monitores = Usuario.query.filter(
+        Usuario.role.in_([
+            'monitor',
+            'coordenador',
+            'admin'
+        ])
+    ).all()
     horarios_escala = HorarioMonitoria.query.all()
 
     allagendamentos =  db.session.query(Agendamento.id).count()
