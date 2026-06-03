@@ -108,7 +108,11 @@ def enviar_notificacao_demanda(agendamento):
         if staff.email
     ]
 
+    print("=== TESTE EMAIL ===")
+    print("DESTINATARIOS:", destinatarios)
+
     if not destinatarios:
+        print("NENHUM DESTINATARIO ENCONTRADO")
         return
 
     msg = Message(
@@ -128,7 +132,11 @@ Projeto: {agendamento.projeto_vinculo}
 Acesse o sistema para aprovar ou recusar.
 """
 
-    mail.send(msg)
+    try:
+        mail.send(msg)
+        print("EMAIL ENVIADO COM SUCESSO")
+    except Exception as e:
+        print("ERRO AO ENVIAR EMAIL:", e)
 
 @login_manager.user_loader
 def load_user(user_id):
