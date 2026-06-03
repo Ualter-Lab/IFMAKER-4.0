@@ -2811,11 +2811,15 @@
 
       <p>
         <strong>Tipo:</strong>
-        {% if monitor.is_voluntario %}
-          Voluntário
-        {% else %}
-          Bolsista
-        {% endif %}
+            {% if monitor.role == 'coordenador' %}
+              Coordenador
+            {% elif monitor.role == 'admin' %}
+              Administrador
+            {% elif monitor.is_voluntario %}
+              Monitor voluntário
+            {% else %}
+              Monitor bolsista
+            {% endif %}
       </p>
 
       <form action="{{ url_for('remover_monitor', monitor_id=monitor.id) }}" method="POST">
