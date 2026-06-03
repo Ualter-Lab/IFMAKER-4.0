@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
-import resend
+import resend # type: ignore
 
 app = Flask(__name__)
 
@@ -116,7 +116,7 @@ def enviar_notificacao_demanda(agendamento):
     try:
         resend.Emails.send({
             "from": "IFMaker <onboarding@resend.dev>",
-            "to": ["waan1@aluno.ifal.edu.br"]
+            "to": ["waan1@aluno.ifal.edu.br"],
             "subject": "Nova demanda no IFMaker",
             "html": f"""
             <h2>Nova demanda recebida</h2>
