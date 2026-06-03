@@ -15,7 +15,8 @@ load_dotenv()
 app.config['SECRET_KEY'] = os.getenv('KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URL_DATABASE')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+
+app.config['MAIL_SERVER'] = 'smtp.mail.me.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
