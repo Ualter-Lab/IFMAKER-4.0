@@ -425,11 +425,6 @@ def remover_monitor(monitor_id):
         flash("Você não pode remover a si mesmo.", "danger")
         return redirect(url_for('index'))
 
-    # Impede remover outro admin
-    if monitor.role == 'admin' and current_user.role != 'admin':
-        flash("Somente administradores podem remover outro administrador.", "danger")
-        return redirect(url_for('index'))
-
     db.session.delete(monitor)
     db.session.commit()
 
