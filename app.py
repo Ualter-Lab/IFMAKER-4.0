@@ -4,8 +4,8 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
-from dotenv import load_dotenv
-from flask_mail import Mail, Message # type: ignore
+from dotenv import load_dotenv´
+import resend
 
 app = Flask(__name__)
 
@@ -14,6 +14,7 @@ load_dotenv()
 # Configurações do App
 app.config['SECRET_KEY'] = os.getenv('KEY')
 database_url = os.getenv('URL_DATABASE')
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace(
@@ -24,15 +25,6 @@ if database_url and database_url.startswith("postgres://"):
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-app.config['MAIL_SERVER'] = 'smtp.mail.me.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
-
-mail = Mail(app)
 
 db = SQLAlchemy(app)
 
@@ -118,35 +110,29 @@ def enviar_notificacao_demanda(agendamento):
         if staff.email
     ]
 
-    print("=== TESTE EMAIL ===")
-    print("DESTINATARIOS:", destinatarios)
-
     if not destinatarios:
-        print("NENHUM DESTINATARIO ENCONTRADO")
         return
 
-    msg = Message(
-        subject='Nova demanda no IFMaker',
-        recipients=destinatarios
-    )
-
-    msg.body = f"""
-Nova demanda recebida.
-
-Aluno: {agendamento.usuario.nome}
-Equipamento: {agendamento.equipamento}
-Data: {agendamento.data_reserva}
-Horário: {agendamento.horario_slot}
-Projeto: {agendamento.projeto_vinculo}
-
-Acesse o sistema para aprovar ou recusar.
-"""
-
     try:
-        mail.send(msg)
-        print("EMAIL ENVIADO COM SUCESSO")
+        resend.Emails.send({
+            "from": "IFMaker <onboarding@resend.dev>",
+            "to": ["waan1@aluno.ifal.edu.br"]
+            "subject": "Nova demanda no IFMaker",
+            "html": f"""
+            <h2>Nova demanda recebida</h2>
+
+            <p><b>Aluno:</b> {agendamento.usuario.nome}</p>
+            <p><b>Equipamento:</b> {agendamento.equipamento}</p>
+            <p><b>Data:</b> {agendamento.data_reserva}</p>
+            <p><b>Horário:</b> {agendamento.horario_slot}</p>
+            <p><b>Projeto:</b> {agendamento.projeto_vinculo}</p>
+            """
+        })
+
+        print("EMAIL ENVIADO")
+
     except Exception as e:
-        print("ERRO AO ENVIAR EMAIL:", e)
+        print("ERRO RESEND:", e)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -273,7 +259,10 @@ def api_agendar():
     db.session.add(novo_agendamento)
     db.session.commit()
 
-    print("Agendamento criado. E-mail desativado temporariamente.")
+    try:
+      enviar_notificacao_demanda(novo_agendamento)
+    except Exception as e:
+        print("ERRO:", e)
 
     return jsonify({
         'success': True,
