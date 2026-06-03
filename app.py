@@ -273,13 +273,6 @@ def api_agendar():
     db.session.add(novo_agendamento)
     db.session.commit()
 
-    print("Agendamento criado. E-mail desativado temporariamente.")
-
-    return jsonify({
-        'success': True,
-        'message': 'Solicitação de agendamento enviada com sucesso!'
-    })
-
     try:
         enviar_notificacao_demanda(novo_agendamento)
     except Exception as e:
