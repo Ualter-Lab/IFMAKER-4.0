@@ -376,7 +376,7 @@ def adicionar_inventario():
 @app.route('/monitor/adicionar', methods=['POST'])
 @login_required
 def adicionar_monitor():
-    if current_user.role not in ['monitor', 'admin']:
+    if current_user.role not in ['monitor', 'coordenador', 'admin']:
         flash("Acesso negado.", "danger")
         return redirect(url_for('index'))
 
@@ -384,9 +384,9 @@ def adicionar_monitor():
     email = request.form.get('email')
     username = request.form.get('username')
     senha = request.form.get('senha')
-    role_recebida = request.form.get('role')
+    role_recebida = request.form.get('role', 'monitor')
     is_voluntario = role_recebida == 'monitor_voluntario'
-    role_final = 'monitor' if role_recebida == 'monitor_voluntario' else role_recebida
+    role_final = 'monitor' if is_voluntario else role_recebida
 
     if Usuario.query.filter((Usuario.email == email) | (Usuario.username == username)).first():
         flash("Já existe um monitor com esse email ou username.", "danger")
