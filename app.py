@@ -13,7 +13,16 @@ load_dotenv()
 
 # Configurações do App
 app.config['SECRET_KEY'] = os.getenv('KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URL_DATABASE')
+database_url = os.getenv('URL_DATABASE')
+
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace(
+        "postgres://",
+        "postgresql://",
+        1
+    )
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['MAIL_SERVER'] = 'smtp.mail.me.com'
