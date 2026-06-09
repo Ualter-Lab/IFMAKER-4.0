@@ -27,6 +27,18 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+@app.route('/setup/descricao')
+def setup_descricao():
+    try:
+        db.session.execute(db.text(
+            "ALTER TABLE agendamentos ADD COLUMN IF NOT EXISTS descricao TEXT;"
+        ))
+        db.session.commit()
+        return "Coluna descricao criada com sucesso!"
+    except Exception as e:
+        db.session.rollback()
+        return f"Erro: {e}"
+
 with app.app_context():
     db.create_all()
 
