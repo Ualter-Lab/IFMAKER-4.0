@@ -97,42 +97,35 @@ class Agendamento(db.Model):
 def enviar_notificacao_demanda(agendamento):
 
     staffs = Usuario.query.filter(
-        Usuario.role.in_([
-            'monitor',
-            'coordenador',
-            'admin'
-        ])
+        Usuario.role.in_(['monitor', 'coordenador', 'admin'])
     ).all()
 
     destinatarios = [
-        staff.email
-        for staff in staffs
-        if staff.email
+        staff.email for staff in staffs if staff.email
     ]
 
     if not destinatarios:
         return
 
+    params: resend.Emails.SendParams = {
+        "from": "onboarding@resend.dev",
+        "to": ["labmaker.marechal@ifal.edu.br"],
+        "subject": "Nova demanda no IFMaker",
+        "html": f"""
+        <h2>Nova demanda recebida</h2>
+        <p><b>Aluno:</b> {agendamento.usuario.nome}</p>
+        <p><b>Equipamento:</b> {agendamento.equipamento}</p>
+        <p><b>Data:</b> {agendamento.data_reserva}</p>
+        <p><b>Horário:</b> {agendamento.horario_slot}</p>
+        <p><b>Projeto:</b> {agendamento.projeto_vinculo}</p>
+        """
+    }
+
     try:
-        resend.Emails.send({
-            "from": "IFMaker <onboarding@resend.dev>",
-            "to": ["waan1@aluno.ifal.edu.br"],
-            "subject": "Nova demanda no IFMaker",
-            "html": f"""
-            <h2>Nova demanda recebida</h2>
-
-            <p><b>Aluno:</b> {agendamento.usuario.nome}</p>
-            <p><b>Equipamento:</b> {agendamento.equipamento}</p>
-            <p><b>Data:</b> {agendamento.data_reserva}</p>
-            <p><b>Horário:</b> {agendamento.horario_slot}</p>
-            <p><b>Projeto:</b> {agendamento.projeto_vinculo}</p>
-            """
-        })
-
-        print("EMAIL ENVIADO")
-
+        email = resend.Emails.send(params)
+        print("RESEND OK:", email)
     except Exception as e:
-        print("ERRO RESEND:", e)
+        print("ERRO RESEND:", repr(e))
 
 @login_manager.user_loader
 def load_user(user_id):
