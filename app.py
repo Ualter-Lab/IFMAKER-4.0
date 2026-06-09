@@ -282,14 +282,11 @@ def api_agendar():
     db.session.add(novo_agendamento)
     db.session.commit()
 
-    try:
-        enviar_notificacao_demanda(novo_agendamento)
-    except Exception as e:
-        print("ERRO GERAL EMAIL:", e)
+    # enviar_notificacao_demanda(novo_agendamento)
 
     return jsonify({
         'success': True,
-        'message': 'Solicitação de agendamento enviada com sucesso!'
+        'message': 'Solicitação enviada com sucesso!'
     })
 
 
