@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
-import resend # type: ignore
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
 
@@ -14,7 +14,6 @@ load_dotenv()
 # Configurações do App
 app.config['SECRET_KEY'] = os.getenv('KEY')
 database_url = os.getenv('URL_DATABASE')
-resend.api_key = os.getenv("RESEND_API_KEY")
 
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace(
@@ -28,12 +27,26 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+with app.app_context():
+    db.create_all()
+
 # Configuração do Controle de Sessão (Login)
 login_manager = LoginManager(app)
 login_manager.login_view = 'acesso' # Redireciona para a aba de acesso se não logado
 login_manager.login_message = "Por favor, faça login para acessar esta página."
 login_manager.login_message_category = "info"
 
+#Configuração da API de notificação
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+app.config['MAIL_TIMEOUT'] = 10
+
+mail = Mail(app)
 
 # ==========================================
 # MODELS (BANCO DE DADOS)
@@ -90,54 +103,58 @@ class Agendamento(db.Model):
     data_reserva = db.Column(db.String(10), nullable=False) # Formato YYYY-MM-DD
     horario_slot = db.Column(db.String(10), nullable=False) # Ex: '08:00'
     projeto_vinculo = db.Column(db.String(100), nullable=True) # Nome do projeto ou disciplina
+    descricao = db.Column(db.Text)
     status = db.Column(db.String(20), nullable=False, default='Pendente') # 'Pendente', 'Aprovado', 'Recusado'
+    
     
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
 
 def enviar_notificacao_demanda(agendamento):
 
     staffs = Usuario.query.filter(
-        Usuario.role.in_(['monitor', 'coordenador', 'admin'])
+        Usuario.role.in_([
+            'monitor',
+            'coordenador',
+            'admin'
+        ])
     ).all()
 
     destinatarios = [
-        staff.email for staff in staffs if staff.email
+        staff.email
+        for staff in staffs
+        if staff.email
     ]
 
     if not destinatarios:
+        print("Nenhum destinatário encontrado.")
         return
 
-    params: resend.Emails.SendParams = {
-        "from": "onboarding@resend.dev",
-        "to": ["labmaker.marechal@ifal.edu.br"],
-        "subject": "Nova demanda no IFMaker",
-        "html": f"""
-        <h2>Nova demanda recebida</h2>
-        <p><b>Aluno:</b> {agendamento.usuario.nome}</p>
-        <p><b>Equipamento:</b> {agendamento.equipamento}</p>
-        <p><b>Data:</b> {agendamento.data_reserva}</p>
-        <p><b>Horário:</b> {agendamento.horario_slot}</p>
-        <p><b>Projeto:</b> {agendamento.projeto_vinculo}</p>
-        """
-    }
+    msg = Message(
+        subject='Nova demanda no IFMaker',
+        recipients=["waan1@aluno.ifal.edu.br"]
+    )
+
+    msg.body = f"""
+Nova demanda recebida.
+
+Aluno: {agendamento.usuario.nome}
+Equipamento: {agendamento.equipamento}
+Data: {agendamento.data_reserva}
+Horário: {agendamento.horario_slot}
+Projeto: {agendamento.projeto_vinculo}
+
+Acesse o sistema para aprovar ou recusar.
+"""
 
     try:
-        params = {
-            "from": "onboarding@resend.dev",
-            "to": ["labmaker.marechal@ifal.edu.br"],
-            "subject": "Teste IFMaker",
-            "html": "<strong>Teste do Resend</strong>"
-        }
+        print("Enviando para:", destinatarios)
 
-        print("API KEY:", os.getenv("RESEND_API_KEY"))
-        print("PARAMS:", params)
+        mail.send(msg)
 
-        resposta = resend.Emails.send(params)
-
-        print("RESPOSTA RESEND:", resposta)
+        print("EMAIL ENVIADO COM SUCESSO!")
 
     except Exception as e:
-        print("ERRO RESEND:", repr(e))
+        print("ERRO AO ENVIAR EMAIL:", e)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -258,6 +275,7 @@ def api_agendar():
         data_reserva=data_reserva,
         horario_slot=horario_slot,
         projeto_vinculo=projeto,
+        descricao = data.get('descricao'),
         usuario_id=current_user.id
     )
     
@@ -265,9 +283,9 @@ def api_agendar():
     db.session.commit()
 
     try:
-      enviar_notificacao_demanda(novo_agendamento)
+        enviar_notificacao_demanda(novo_agendamento)
     except Exception as e:
-        print("ERRO:", e)
+        print("ERRO GERAL EMAIL:", e)
 
     return jsonify({
         'success': True,
