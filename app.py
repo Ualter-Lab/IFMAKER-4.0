@@ -274,17 +274,24 @@ def api_agendar():
 @app.route('/api/agendamento/<int:id>/status', methods=['POST'])
 @login_required
 def atualizar_status_agendamento(id):
-    if current_user.role != 'monitor':
-        return jsonify({'success': False, 'message': 'Acesso negado. Apenas monitores podem moderar.'}), 403
-        
+
+    if current_user.role not in ['monitor', 'coordenador', 'admin']:
+        return jsonify({
+            'success': False,
+            'message': 'Acesso negado. Apenas membros da equipe podem moderar.'
+        }), 403
+
     data = request.get_json()
     status_recebido = data.get('status')
-    
+
     agendamento = Agendamento.query.get_or_404(id)
     agendamento.status = status_recebido
     db.session.commit()
-    
-    return jsonify({'success': True, 'message': f'Status atualizado para {status_recebido}.'})
+
+    return jsonify({
+        'success': True,
+        'message': f'Status atualizado para {status_recebido}.'
+    })
 
 
 # CLI Command para alimentar o banco de dados com dados iniciais de teste
