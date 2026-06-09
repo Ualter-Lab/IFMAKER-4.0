@@ -1854,6 +1854,26 @@
         gap: 12px;
       }
     }
+
+    .equip-desc {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .equip-card {
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .equip-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .equip-card.selected .equip-desc {
+      color: rgba(255, 255, 255, 0.9);
+    }
   </style>
 </head>
 
@@ -2300,78 +2320,104 @@
       <div class="card card-padded">
         <div class="booking-step-label">1. Escolha a Máquina</div>
         <div class="equip-selector">
+
           <div class="equip-card" onclick="selectEquip(this, '3d')">
-            <div class="equip-icon">🤖</div>
+            <div class="equip-icon">🖨️</div>
             <div class="equip-name">Impressora 3D</div>
+            <div class="equip-desc">
+              Impressão de peças, protótipos e projetos.
+            </div>
           </div>
+
           <div class="equip-card" onclick="selectEquip(this, 'laser')">
-            <div class="equip-icon">⚡</div>
-            <div class="equip-name">Cortadora Laser</div>
+            <div class="equip-icon">✂️</div>
+            <div class="equip-name">Cortadora a Laser</div>
+            <div class="equip-desc">
+              Corte e gravação em MDF, acrílico e outros materiais.
+            </div>
           </div>
+
           <div class="equip-card" onclick="selectEquip(this, 'arduino')">
             <div class="equip-icon">🔌</div>
-            <div class="equip-name">Bancada Eletrónica</div>
+            <div class="equip-name">Bancada de Eletrônica</div>
+            <div class="equip-desc">
+              Desenvolvimento e testes com Arduino e componentes.
+            </div>
           </div>
-        </div>
 
-        <div class="booking-step-label">2. Tipo de Atividade</div>
-        <div class="vinculo-toggle">
-          <button class="vinculo-btn active" id="vbtn-projeto" onclick="setVinculo('projeto')">
-            📁 Projeto Pesquisa/Extensão
-          </button>
-          <button class="vinculo-btn" id="vbtn-aula" onclick="setVinculo('aula')">
-            🏫 Aula / Disciplina
-          </button>
-        </div>
-
-        <div class="vinculo-fields" id="vf-projeto">
-          <div class="form-group">
-            <label>Nome do Projeto <span class="required">*</span></label>
-            <input type="text" id="projetoNome" class="form-control" placeholder="Ex: Robô de Resgate Geopolítico" />
+          <div class="equip-card" onclick="selectEquip(this, 'outros')">
+            <div class="equip-icon">📦</div>
+            <div class="equip-name">Outros</div>
+            <div class="equip-desc">
+              Equipamentos não listados. Descreva sua necessidade.
+            </div>
           </div>
-        </div>
-        <div class="vinculo-fields" id="vf-aula" style="display: none">
-          <div class="form-group">
-            <label>Disciplina / Professor <span class="required">*</span></label>
-            <input type="text" id="disciplinaNome" class="form-control"
-              placeholder="Ex: Sistemas Embarcados - Prof. Carlos" />
-          </div>
-        </div>
 
-        <div class="form-group">
-          <label>Descrição da solicitação</label>
-
-          <textarea name="descricao" id="descricao" rows="4" maxlength="500"
-            placeholder="Explique brevemente para que será utilizado o equipamento..."></textarea>
         </div>
-
-        <div class="booking-step-label">3. Data e Janela Horária</div>
-        <div class="form-group">
-          <label>Escolha a Data <span class="required">*</span></label>
-          <input type="date" id="dataAgendamento" class="form-control" style="font-family: var(--font-sans)" />
+        <div class="equip-card" onclick="selectEquip(this, 'outros')">
+          <div class="equip-icon"></div>
+          <div class="equip-name">Outros</div>
         </div>
+      </div>
 
-        <label class="form-group" style="font-size: 13px; font-weight: 600; margin-bottom: 6px">Janela de Horário <span
-            class="required">*</span></label>
-        <div class="time-slots">
-          <div class="time-slot" onclick="selectSlot(this)">08:00</div>
-          <div class="time-slot" onclick="selectSlot(this)">09:30</div>
-          <div class="time-slot" onclick="selectSlot(this)">13:00</div>
-          <div class="time-slot" onclick="selectSlot(this)">14:30</div>
-        </div>
-
-        <button class="btn-primary" style="margin-top: 28px; width: 100%; justify-content: center"
-          onclick="submitBooking()">
-          🚀 Submeter Pedido de Reserva
+      <div class="booking-step-label">2. Tipo de Atividade</div>
+      <div class="vinculo-toggle">
+        <button class="vinculo-btn active" id="vbtn-projeto" onclick="setVinculo('projeto')">
+          📁 Projeto Pesquisa/Extensão
+        </button>
+        <button class="vinculo-btn" id="vbtn-aula" onclick="setVinculo('aula')">
+          🏫 Aula / Disciplina
         </button>
       </div>
 
-      <div class="booking-info">
-        <div class="card card-padded" style="background: var(--surface-raised)">
-          <h4 style="font-weight: 700; margin-bottom: 10px">
-            Regulamento Interno
-          </h4>
-          <ul style="
+      <div class="vinculo-fields" id="vf-projeto">
+        <div class="form-group">
+          <label>Nome do Projeto <span class="required">*</span></label>
+          <input type="text" id="projetoNome" class="form-control" placeholder="Ex: Robô de Resgate Geopolítico" />
+        </div>
+      </div>
+      <div class="vinculo-fields" id="vf-aula" style="display: none">
+        <div class="form-group">
+          <label>Disciplina / Professor <span class="required">*</span></label>
+          <input type="text" id="disciplinaNome" class="form-control"
+            placeholder="Ex: Sistemas Embarcados - Prof. Carlos" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição da solicitação</label>
+
+        <textarea name="descricao" id="descricao" rows="4" maxlength="500"
+          placeholder="Explique brevemente para que será utilizado o equipamento..."></textarea>
+      </div>
+
+      <div class="booking-step-label">3. Data e Janela Horária</div>
+      <div class="form-group">
+        <label>Escolha a Data <span class="required">*</span></label>
+        <input type="date" id="dataAgendamento" class="form-control" style="font-family: var(--font-sans)" />
+      </div>
+
+      <label class="form-group" style="font-size: 13px; font-weight: 600; margin-bottom: 6px">Janela de Horário <span
+          class="required">*</span></label>
+      <div class="time-slots">
+        <div class="time-slot" onclick="selectSlot(this)">08:00</div>
+        <div class="time-slot" onclick="selectSlot(this)">09:30</div>
+        <div class="time-slot" onclick="selectSlot(this)">13:00</div>
+        <div class="time-slot" onclick="selectSlot(this)">14:30</div>
+      </div>
+
+      <button class="btn-primary" style="margin-top: 28px; width: 100%; justify-content: center"
+        onclick="submitBooking()">
+        🚀 Submeter Pedido de Reserva
+      </button>
+    </div>
+
+    <div class="booking-info">
+      <div class="card card-padded" style="background: var(--surface-raised)">
+        <h4 style="font-weight: 700; margin-bottom: 10px">
+          Regulamento Interno
+        </h4>
+        <ul style="
                 padding-left: 18px;
                 font-size: 13px;
                 color: var(--text-muted);
@@ -2379,24 +2425,24 @@
                 flex-direction: column;
                 gap: 8px;
               ">
-            <li>
-              As solicitações devem ser submetidas com no mínimo
-              <strong>24h de antecedência</strong>.
-            </li>
-            <li>
-              O limite máximo de permanência contínua por agendamento é de
-              <strong>2 horas</strong>.
-            </li>
-            <li>
-              Sempre limpe a bancada e organize as ferramentas antes de sair.
-            </li>
-            <li>
-              Qualquer avaria deve ser imediatamente reportada ao monitor
-              ativo.
-            </li>
-          </ul>
-        </div>
+          <li>
+            As solicitações devem ser submetidas com no mínimo
+            <strong>24h de antecedência</strong>.
+          </li>
+          <li>
+            O limite máximo de permanência contínua por agendamento é de
+            <strong>2 horas</strong>.
+          </li>
+          <li>
+            Sempre limpe a bancada e organize as ferramentas antes de sair.
+          </li>
+          <li>
+            Qualquer avaria deve ser imediatamente reportada ao monitor
+            ativo.
+          </li>
+        </ul>
       </div>
+    </div>
     </div>
     {% else %}
     <div class="card card-padded" style="text-align: center; padding: 48px 20px">
