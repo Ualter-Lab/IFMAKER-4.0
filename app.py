@@ -122,8 +122,20 @@ def enviar_notificacao_demanda(agendamento):
     }
 
     try:
-        email = resend.Emails.send(params)
-        print("RESEND OK:", email)
+        params = {
+            "from": "onboarding@resend.dev",
+            "to": ["labmaker.marechal@ifal.edu.br"],
+            "subject": "Teste IFMaker",
+            "html": "<strong>Teste do Resend</strong>"
+        }
+
+        print("API KEY:", os.getenv("RESEND_API_KEY"))
+        print("PARAMS:", params)
+
+        resposta = resend.Emails.send(params)
+
+        print("RESPOSTA RESEND:", resposta)
+
     except Exception as e:
         print("ERRO RESEND:", repr(e))
 
