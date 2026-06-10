@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
+import request
 
 app = Flask(__name__)
 
@@ -110,6 +111,27 @@ class Agendamento(db.Model):
     db.ForeignKey('usuarios.id', ondelete='CASCADE'),
     nullable=False
     )
+
+def criar_card_trello(agendamento):
+    url = "https://api.trello.com/1/cards"
+
+    params = {
+        "key": os.getenv("TRELLO_KEY"),
+        "token": os.getenv("TRELLO_TOKEN"),
+        "idList": os.getenv("TRELLO_LIST_ID"),
+        "name": f"{agendamento.equipamento} - {agendamento.usuario.nome}",
+        "desc": f"""
+Aluno: {agendamento.usuario.nome}
+Equipamento: {agendamento.equipamento}
+Data: {agendamento.data_reserva}
+Horário: {agendamento.horario_slot}
+Projeto: {agendamento.projeto_vinculo}
+Descrição: {agendamento.descricao or 'Sem descrição'}
+"""
+    }
+
+    r = requests.post(url, params=params, timeout=10)
+    print("TRELLO:", r.status_code, r.text)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -248,28 +270,25 @@ def api_agendar():
 
 
 # Gerenciamento de Agendamento pelos Monitores (Aprovar/Recusar)
-@app.route('/api/agendamento/<int:id>/status', methods=['POST'])
+@app.route('/agendamento/<int:id>/status', methods=['POST'])
 @login_required
-def atualizar_status_agendamento(id):
-
-    if current_user.role not in ['monitor', 'coordenador', 'admin']:
-        return jsonify({
-            'success': False,
-            'message': 'Acesso negado. Apenas membros da equipe podem moderar.'
-        }), 403
-
-    data = request.get_json()
-    status_recebido = data.get('status')
-
+def atualizar_status(id):
     agendamento = Agendamento.query.get_or_404(id)
-    agendamento.status = status_recebido
+
+    novo_status = request.form.get('status')
+
+    agendamento.status = novo_status
+
     db.session.commit()
 
-    return jsonify({
-        'success': True,
-        'message': f'Status atualizado para {status_recebido}.'
-    })
+    # Se foi aprovado, cria o card no Trello
+    if novo_status.lower() == 'aprovado':
+        try:
+            criar_card_trello(agendamento)
+        except Exception as e:
+            print("ERRO TRELLO:", e)
 
+    return redirect(url_for('index'))
 
 # CLI Command para alimentar o banco de dados com dados iniciais de teste
 @app.cli.command("add-monitor")
