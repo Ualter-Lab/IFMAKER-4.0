@@ -536,6 +536,37 @@ def remover_monitor(monitor_id):
     flash("Membro removido com sucesso!", "success")
     return redirect(url_for('index'))
 
+@app.route('/agendamentos/apagar-todos', methods=['POST'])
+@login_required
+def apagar_todos_agendamentos():
+
+    if current_user.role not in ['coordenador', 'admin']:
+        flash("Acesso negado.", "danger")
+        return redirect(url_for('index'))
+
+    try:
+        quantidade = Agendamento.query.count()
+
+        Agendamento.query.delete()
+
+        db.session.commit()
+
+        flash(
+            f"{quantidade} agendamento(s) removido(s) com sucesso!",
+            "success"
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        print("Erro ao apagar agendamentos:", e)
+
+        flash(
+            "Erro ao apagar os agendamentos.",
+            "danger"
+        )
+
+    return redirect(url_for('index'))
+
 with app.app_context():
     db.create_all()
 
