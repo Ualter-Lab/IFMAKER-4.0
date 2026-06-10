@@ -80,8 +80,13 @@ class Usuario(db.Model, UserMixin):
     'Agendamento',
     backref='usuario',
     lazy=True,
+    cascade='all, delete-orphan',
+    horarios = db.relationship(
+    'HorarioMonitoria',
+    backref='monitor',
+    lazy=True,
     cascade='all, delete-orphan'
-    horarios = db.relationship('HorarioMonitoria', backref='monitor', lazy=True)
+)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
