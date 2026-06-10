@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
-from flask_mail import Mail, Message
 
 app = Flask(__name__)
 
@@ -35,18 +34,6 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'acesso' # Redireciona para a aba de acesso se não logado
 login_manager.login_message = "Por favor, faça login para acessar esta página."
 login_manager.login_message_category = "info"
-
-#Configuração da API de notificação
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
-
-app.config['MAIL_TIMEOUT'] = 10
-
-mail = Mail(app)
 
 # ==========================================
 # MODELS (BANCO DE DADOS)
@@ -123,53 +110,6 @@ class Agendamento(db.Model):
     db.ForeignKey('usuarios.id', ondelete='CASCADE'),
     nullable=False
     )
-
-def enviar_notificacao_demanda(agendamento):
-
-    staffs = Usuario.query.filter(
-        Usuario.role.in_([
-            'monitor',
-            'coordenador',
-            'admin'
-        ])
-    ).all()
-
-    destinatarios = [
-        staff.email
-        for staff in staffs
-        if staff.email
-    ]
-
-    if not destinatarios:
-        print("Nenhum destinatário encontrado.")
-        return
-
-    msg = Message(
-        subject='Nova demanda no IFMaker',
-        recipients=["waan1@aluno.ifal.edu.br"]
-    )
-
-    msg.body = f"""
-Nova demanda recebida.
-
-Aluno: {agendamento.usuario.nome}
-Equipamento: {agendamento.equipamento}
-Data: {agendamento.data_reserva}
-Horário: {agendamento.horario_slot}
-Projeto: {agendamento.projeto_vinculo}
-
-Acesse o sistema para aprovar ou recusar.
-"""
-
-    try:
-        print("Enviando para:", destinatarios)
-
-        mail.send(msg)
-
-        print("EMAIL ENVIADO COM SUCESSO!")
-
-    except Exception as e:
-        print("ERRO AO ENVIAR EMAIL:", e)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -300,8 +240,6 @@ def api_agendar():
     
     db.session.add(novo_agendamento)
     db.session.commit()
-
-    # enviar_notificacao_demanda(novo_agendamento)
 
     return jsonify({
         'success': True,
