@@ -545,6 +545,10 @@ def apagar_todos_agendamentos():
         )
 
     return redirect(url_for('index'))
+    
+@app.route('/ping')
+def ping():
+    return "ok", 200
 
 with app.app_context():
     db.create_all()
