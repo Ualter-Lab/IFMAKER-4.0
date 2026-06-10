@@ -245,7 +245,13 @@ def api_agendar():
     data_reserva = data.get('data')
     horario_slot = data.get('horario')
     projeto = data.get('projeto', '')
-    descricao = data.get('descricao')
+    descricao = data.get('descricao', '').strip()
+
+    if equipamento == 'outros' and not descricao:
+    return jsonify({
+        'success': False,
+        'message': 'Descreva qual equipamento ou necessidade você possui.'
+    }), 400
 
     # Verificação simples de colisão de horário para o mesmo equipamento
     colisao = Agendamento.query.filter_by(
