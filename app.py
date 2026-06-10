@@ -112,6 +112,10 @@ class Agendamento(db.Model):
     )
 
 def criar_card_trello(agendamento):
+    print("TRELLO_KEY:", os.getenv("TRELLO_KEY"))
+    print("TRELLO_TOKEN:", os.getenv("TRELLO_TOKEN"))
+    print("TRELLO_LIST_ID:", os.getenv("TRELLO_LIST_ID"))
+
     url = "https://api.trello.com/1/cards"
 
     params = {
@@ -130,7 +134,9 @@ Descrição: {agendamento.descricao or 'Sem descrição'}
     }
 
     r = requests.post(url, params=params, timeout=10)
-    print("TRELLO:", r.status_code, r.text)
+
+    print("TRELLO STATUS:", r.status_code)
+    print("TRELLO RESPOSTA:", r.text)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -286,8 +292,10 @@ def atualizar_status_agendamento(id):
     db.session.commit()
 
     if status_recebido == 'Aprovado':
+        print("STATUS APROVADO, TENTANDO CRIAR CARD...")
         try:
             criar_card_trello(agendamento)
+            print("FUNÇÃO TRELLO EXECUTADA")
         except Exception as e:
             print("ERRO TRELLO:", e)
 
