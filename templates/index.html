@@ -2694,6 +2694,14 @@
           </p>
           {% endfor %}
         </div>
+        <form action="{{ url_for('apagar_todos_agendamentos') }}"
+      method="POST"
+      onsubmit="return confirm('Tem certeza que deseja apagar TODOS os pedidos? Esta ação não pode ser desfeita.');">
+
+    <button class="btn-danger">
+        🗑️ Apagar todos os pedidos
+    </button>
+    </form>
       </div>
     </div>
 
