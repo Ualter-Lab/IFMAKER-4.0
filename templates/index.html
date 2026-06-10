@@ -2996,6 +2996,8 @@
       const escopoTexto = isProjeto
         ? document.getElementById("projetoNome").value
         : document.getElementById("disciplinaNome").value;
+      
+      const descricao = document.getElementById("descricao").value;
 
       if (!selectedEquipment) {
         showToast("Por favor, selecione um equipamento!", true);
@@ -3019,6 +3021,7 @@
         data: dateInput,
         horario: selectedTimeSlot,
         projeto: escopoTexto,
+        descricao: descricao,
       };
 
       fetch("/api/agendar", {
