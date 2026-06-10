@@ -182,7 +182,11 @@ def index():
     allequipamentos = db.session.query(ItemInventario.id).count()
     
     # Agendamentos para exibição no Dashboard do Monitor/Admin
-    todos_agendamentos = Agendamento.query.order_by(Agendamento.data_reserva.desc()).all() if not current_user.is_anonymous and current_user.role in ['monitor', 'admin'] else []
+    todos_agendamentos = (
+    Agendamento.query.order_by(Agendamento.data_reserva.desc()).all()
+    if not current_user.is_anonymous and current_user.role in ['monitor', 'coordenador', 'admin']
+    else []
+)
     
     return render_template(
         'index.html', 
