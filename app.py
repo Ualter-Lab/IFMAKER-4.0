@@ -269,26 +269,33 @@ def api_agendar():
 
 
 # Gerenciamento de Agendamento pelos Monitores (Aprovar/Recusar)
-@app.route('/agendamento/<int:id>/status', methods=['POST'])
+@app.route('/api/agendamento/<int:id>/status', methods=['POST'])
 @login_required
-def atualizar_status(id):
+def atualizar_status_agendamento(id):
+    if current_user.role not in ['monitor', 'coordenador', 'admin']:
+        return jsonify({
+            'success': False,
+            'message': 'Acesso negado.'
+        }), 403
+
+    data = request.get_json()
+    status_recebido = data.get('status')
+
     agendamento = Agendamento.query.get_or_404(id)
-
-    novo_status = request.form.get('status')
-
-    agendamento.status = novo_status
-
+    agendamento.status = status_recebido
     db.session.commit()
 
-    # Se foi aprovado, cria o card no Trello
-    if novo_status.lower() == 'aprovado':
+    if status_recebido == 'Aprovado':
         try:
             criar_card_trello(agendamento)
         except Exception as e:
             print("ERRO TRELLO:", e)
 
-    return redirect(url_for('index'))
-
+    return jsonify({
+        'success': True,
+        'message': f'Status atualizado para {status_recebido}.'
+    })
+    
 # CLI Command para alimentar o banco de dados com dados iniciais de teste
 @app.cli.command("add-monitor")
 def add_monitor():
