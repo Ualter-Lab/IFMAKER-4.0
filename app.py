@@ -76,7 +76,11 @@ class Usuario(db.Model, UserMixin):
     is_voluntario = db.Column(db.Boolean, default=False)              # Para chips estilizados de monitores
     
     # Relacionamentos
-    agendamentos = db.relationship('Agendamento', backref='usuario', lazy=True)
+    agendamentos = db.relationship(
+    'Agendamento',
+    backref='usuario',
+    lazy=True,
+    cascade='all, delete-orphan'
     horarios = db.relationship('HorarioMonitoria', backref='monitor', lazy=True)
 
     def set_password(self, password):
@@ -107,7 +111,10 @@ class Agendamento(db.Model):
     status = db.Column(db.String(20), nullable=False, default='Pendente') # 'Pendente', 'Aprovado', 'Recusado'
     
     
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    usuario_id = db.Column(
+    db.Integer,
+    db.ForeignKey('usuarios.id', ondelete='CASCADE'),
+    nullable=False
 
 def enviar_notificacao_demanda(agendamento):
 
@@ -514,9 +521,10 @@ def remover_monitor(monitor_id):
         flash("Você não pode remover a si mesmo.", "danger")
         return redirect(url_for('index'))
 
+    Agendamento.query.filter_by(usuario_id=monitor.id).delete()
     db.session.delete(monitor)
     db.session.commit()
-
+    
     flash("Membro removido com sucesso!", "success")
     return redirect(url_for('index'))
 
