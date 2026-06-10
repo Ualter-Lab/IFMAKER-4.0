@@ -122,6 +122,7 @@ class Agendamento(db.Model):
     db.Integer,
     db.ForeignKey('usuarios.id', ondelete='CASCADE'),
     nullable=False
+    )
 
 def enviar_notificacao_demanda(agendamento):
 
