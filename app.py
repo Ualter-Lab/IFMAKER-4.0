@@ -245,6 +245,7 @@ def api_agendar():
     data_reserva = data.get('data')
     horario_slot = data.get('horario')
     projeto = data.get('projeto', '')
+    descricao = data.get('descricao')
 
     # Verificação simples de colisão de horário para o mesmo equipamento
     colisao = Agendamento.query.filter_by(
@@ -262,7 +263,7 @@ def api_agendar():
         data_reserva=data_reserva,
         horario_slot=horario_slot,
         projeto_vinculo=projeto,
-        descricao = data.get('descricao'),
+        descricao = descricao,
         usuario_id=current_user.id
     )
     
