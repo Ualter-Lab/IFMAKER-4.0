@@ -550,13 +550,19 @@ def apagar_todos_agendamentos():
 def ping():
     return "ok", 200
 
-@app.route('/restore', methods=['POST'])
+import json
+
+@app.route('/restore')
 def restore():
-    data = request.get_json()
 
     try:
+        with open('backup.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
         for u in data.get("usuarios", []):
+
             if not Usuario.query.filter_by(email=u["email"]).first():
+
                 usuario = Usuario(
                     nome=u["nome"],
                     email=u["email"],
@@ -566,29 +572,15 @@ def restore():
                     role=u["role"],
                     is_voluntario=u.get("is_voluntario", False)
                 )
+
                 db.session.add(usuario)
 
         db.session.commit()
 
-        for a in data.get("agendamentos", []):
-            agendamento = Agendamento(
-                equipamento=a["equipamento"],
-                data_reserva=a["data_reserva"],
-                horario_slot=a["horario_slot"],
-                projeto_vinculo=a.get("projeto_vinculo"),
-                descricao=a.get("descricao"),
-                status=a["status"],
-                usuario_id=a["usuario_id"]
-            )
-            db.session.add(agendamento)
-
-        db.session.commit()
-
-        return "Backup restaurado com sucesso!"
+        return "Usuários restaurados com sucesso!"
 
     except Exception as e:
-        db.session.rollback()
-        return f"Erro ao restaurar: {e}", 500
+        return f"Erro: {e}", 500
 
 with app.app_context():
     db.create_all()
