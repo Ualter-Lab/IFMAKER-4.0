@@ -550,6 +550,41 @@ def apagar_todos_agendamentos():
 def ping():
     return "ok", 200
 
+@app.route('/backup')
+@login_required
+def backup():
+    if current_user.role != 'admin':
+        return "Acesso negado", 403
+
+    return jsonify({
+        "usuarios": [
+            {
+                "id": u.id,
+                "nome": u.nome,
+                "email": u.email,
+                "username": u.username,
+                "password_hash": u.password_hash,
+                "role": u.role,
+                "is_voluntario": u.is_voluntario
+            }
+            for u in Usuario.query.all()
+        ],
+
+        "agendamentos": [
+            {
+                "id": a.id,
+                "equipamento": a.equipamento,
+                "data_reserva": a.data_reserva,
+                "horario_slot": a.horario_slot,
+                "projeto_vinculo": a.projeto_vinculo,
+                "descricao": a.descricao,
+                "status": a.status,
+                "usuario_id": a.usuario_id
+            }
+            for a in Agendamento.query.all()
+        ]
+    })
+
 with app.app_context():
     db.create_all()
 
