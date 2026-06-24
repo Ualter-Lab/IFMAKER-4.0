@@ -162,7 +162,7 @@ def index():
     horarios_escala = HorarioMonitoria.query.all()
 
     allagendamentos =  db.session.query(Agendamento.id).count()
-    allequipamentos = db.session.query(ItemInventario.id).count()
+    allequipamentos = db.session.query(ItemInventario.quantidade).count()
     
     # Agendamentos para exibição no Dashboard do Monitor/Admin
     todos_agendamentos = (
