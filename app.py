@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, request
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, func
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
@@ -162,7 +162,7 @@ def index():
     horarios_escala = HorarioMonitoria.query.all()
 
     allagendamentos =  db.session.query(Agendamento.id).count()
-    allequipamentos = db.session.query(ItemInventario.quantidade).count()
+    allequipamentos = db.session.query(func.sum(ItemInventario.quantidade)).scalar() or 0
     
     # Agendamentos para exibição no Dashboard do Monitor/Admin
     todos_agendamentos = (
