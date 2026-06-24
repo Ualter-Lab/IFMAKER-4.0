@@ -550,38 +550,6 @@ def apagar_todos_agendamentos():
 def ping():
     return "ok", 200
 
-import json
-
-@app.route('/restore')
-def restore():
-
-    try:
-        with open('backup.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
-        for u in data.get("usuarios", []):
-
-            if not Usuario.query.filter_by(email=u["email"]).first():
-
-                usuario = Usuario(
-                    nome=u["nome"],
-                    email=u["email"],
-                    username=u.get("username"),
-                    matricula=u.get("matricula"),
-                    password_hash=u["password_hash"],
-                    role=u["role"],
-                    is_voluntario=u.get("is_voluntario", False)
-                )
-
-                db.session.add(usuario)
-
-        db.session.commit()
-
-        return "Usuários restaurados com sucesso!"
-
-    except Exception as e:
-        return f"Erro: {e}", 500
-
 with app.app_context():
     db.create_all()
 
