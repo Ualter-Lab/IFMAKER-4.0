@@ -28,6 +28,27 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# ==========================================
+# CATEGORIAS DE EQUIPAMENTO (fonte única de verdade)
+# ==========================================
+# Slugs usados na coluna 'categoria' da tabela inventario e no
+# 'equipamento' da tabela agendamentos. Não alterar os slugs sem migrar
+# os dados existentes no banco.
+CATEGORIAS_EQUIPAMENTO = [
+    {'slug': '3d', 'nome': 'Impressora 3D', 'rotulo': 'Impressão 3D', 'icone': '🖨️'},
+    {'slug': 'laser', 'nome': 'Cortadora Laser', 'rotulo': 'Cortadora Laser', 'icone': '⚡'},
+    {'slug': 'arduino', 'nome': 'Bancada Eletrônica', 'rotulo': 'Eletrônica', 'icone': '🔌'},
+    {'slug': 'lego', 'nome': 'Kit Educacional Lego', 'rotulo': 'Lego', 'icone': '🤖'},
+    {'slug': 'ferramentas', 'nome': 'Ferramentas', 'rotulo': 'Ferramentas', 'icone': '🔨'},
+    {'slug': 'outros', 'nome': 'Outros', 'rotulo': 'Outros', 'icone': '📦'},
+]
+CATEGORIAS_SLUGS = {c['slug'] for c in CATEGORIAS_EQUIPAMENTO}
+
+
+@app.context_processor
+def inject_categorias_equipamento():
+    return dict(categorias_equipamento=CATEGORIAS_EQUIPAMENTO)
+
 with app.app_context():
     db.create_all()
 
@@ -248,6 +269,12 @@ def api_agendar():
     projeto = data.get('projeto', '')
     descricao = data.get('descricao', '').strip()
 
+    if equipamento not in CATEGORIAS_SLUGS:
+        return jsonify({
+            'success': False,
+            'message': 'Categoria de equipamento inválida.'
+        }), 400
+
     if equipamento == 'outros' and not descricao:
         return jsonify({
             'success': False,
@@ -441,7 +468,11 @@ def adicionar_inventario():
     quantidade = request.form.get('quantidade')
     descricao = request.form.get('descricao')
     status = request.form.get('status')
-    categoria = request.form.get('categoria', 'Geral')
+    categoria = request.form.get('categoria', '')
+
+    if categoria not in CATEGORIAS_SLUGS:
+        flash("Categoria inválida. Selecione uma categoria válida.", "danger")
+        return redirect(url_for('index'))
 
     novo_item = ItemInventario(
         nome=nome,

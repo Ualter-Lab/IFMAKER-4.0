@@ -2300,35 +2300,12 @@
       <div class="card card-padded">
         <div class="booking-step-label">1. Escolha a Máquina</div>
         <div class="equip-selector">
-          <div class="equip-card" onclick="selectEquip(this, '3d')">
-            <div class="equip-icon">🖨️</div>
-            <div class="equip-name">Impressora 3D</div>
+          {% for cat in categorias_equipamento %}
+          <div class="equip-card" onclick="selectEquip(this, '{{ cat.slug }}')">
+            <div class="equip-icon">{{ cat.icone }}</div>
+            <div class="equip-name">{{ cat.nome }}</div>
           </div>
-
-          <div class="equip-card" onclick="selectEquip(this, 'laser')">
-            <div class="equip-icon">⚡</div>
-            <div class="equip-name">Cortadora Laser</div>
-          </div>
-
-          <div class="equip-card" onclick="selectEquip(this, 'arduino')">
-            <div class="equip-icon">🔌</div>
-            <div class="equip-name">Bancada Eletrónica</div>
-          </div>
-
-          <div class="equip-card" onclick="selectEquip(this, 'lego')">
-            <div class="equip-icon">🤖</div>
-            <div class="equip-name">Kit Educacional Lego</div>
-          </div>
-
-          <div class="equip-card" onclick="selectEquip(this, 'ferramentas')">
-            <div class="equip-icon">🔨</div>
-            <div class="equip-name">Ferramentas</div>
-          </div>
-
-          <div class="equip-card" onclick="selectEquip(this, 'outros')">
-            <div class="equip-icon">📦</div>
-            <div class="equip-name">Outros</div>
-          </div>
+          {% endfor %}
         </div>
 
 
@@ -2431,21 +2408,17 @@
 
     <div class="inv-controls">
       <div class="search-box">
-        <input type="text" id="invSearch" placeholder="Procurar componente... (ex: Arduino, PLA, Servo)"
+        <input type="text" id="invSearch" placeholder="Procurar equipamento... (ex: Arduino, Lego, Furadeira)"
           oninput="filterInventory()" />
       </div>
       <button class="filter-btn active" onclick="setFilterCat(this, 'all')">
         Todos
       </button>
-      <button class="filter-btn" onclick="setFilterCat(this, 'fabricacao')">
-        Fabricação Digital
+      {% for cat in categorias_equipamento %}
+      <button class="filter-btn" onclick="setFilterCat(this, '{{ cat.slug }}')">
+        {{ cat.rotulo }}
       </button>
-      <button class="filter-btn" onclick="setFilterCat(this, 'eletronica')">
-        Eletrónica
-      </button>
-      <button class="filter-btn" onclick="setFilterCat(this, 'insumo')">
-        Insumos
-      </button>
+      {% endfor %}
     </div>
 
     <div class="inv-grid" id="invGrid">
@@ -2853,7 +2826,15 @@
               <option value="unavail">Indisponível</option>
             </select>
           </div>
-          <input type="hidden" name="categoria" value="Geral"> <button type="submit" class="btn-primary"
+          <div style="flex: 1; min-width: 140px;">
+            <label style="font-size: 11px; display: block; margin-bottom: 4px;">Categoria</label>
+            <select name="categoria" class="form-control" style="padding: 5px; width: 100%;" required>
+              {% for cat in categorias_equipamento %}
+              <option value="{{ cat.slug }}">{{ cat.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn-primary"
             style="padding: 7px 15px; font-size: 12px; height: 32px;">Adicionar</button>
         </form>
       </div>
