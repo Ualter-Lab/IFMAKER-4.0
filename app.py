@@ -26,6 +26,13 @@ if database_url and database_url.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# O Neon suspende o banco após ~5 min ociosos e derruba as conexões abertas.
+# O pre-ping testa a conexão antes de entregá-la e reconecta se estiver morta.
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 280,
+}
+
 db = SQLAlchemy(app)
 
 # ==========================================
@@ -584,6 +591,15 @@ def ping():
 
 with app.app_context():
     db.create_all()
+
+
+@app.errorhandler(500)
+def erro_interno(e):
+    # Após uma query falhar, a sessão fica inutilizável para as próximas
+    # requisições deste worker até sofrer rollback.
+    db.session.rollback()
+    return render_template('erro.html'), 500
+
 
 if __name__ == '__main__':
     # Cria as tabelas caso não existam ao rodar diretamente
