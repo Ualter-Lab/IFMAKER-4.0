@@ -403,45 +403,9 @@ def add_monitor():
         db.session.rollback()
         print(f"\n❌ Erro ao salvar no banco de dados: {e}")
 
-@app.cli.command("setup-inventario")
-def setup_inventario():
-    """Configura o preset do inventário com os dados exatos do invData."""
-    db.create_all()
-    
-    # Dados extraídos exatamente do teu invData
-    inv_data = [
-        {'name': 'Impressora 3D Creality Ender 3', 'cat': 'fabricacao', 'desc': 'Volume de impressão 220×220×250mm, filamento PLA/ABS/PETG. Resolução mín. 0.1mm.', 'status': 'ok', 'qty': 2},
-        {'name': 'Cortadora Laser 40W', 'cat': 'fabricacao', 'desc': 'Área de trabalho 300×200mm. Corte e gravação em acrílico, madeira, MDF, couro.', 'status': 'ok', 'qty': 1},
-        {'name': 'Fresadora CNC 3018', 'cat': 'fabricacao', 'desc': 'Eixos XYZ, ideal para PCB e madeira. Software GRBL. Área 300×180mm.', 'status': 'ok', 'qty': 1},
-        {'name': 'Bancada de Eletrônica', 'cat': 'eletronica', 'desc': 'Estação de solda, multímetro, osciloscópio USB, fonte de bancada regulável.', 'status': 'ok', 'qty': 4},
-        {'name': 'Kit Arduino Mega + Shields', 'cat': 'eletronica', 'desc': 'Arduino Mega 2560, protoboard, sensores variados, módulos Bluetooth e Wi-Fi.', 'status': 'ok', 'qty': 10},
-        {'name': 'Kit ESP32 IoT', 'cat': 'eletronica', 'desc': 'Módulos ESP32 DevKit, sensores de temperatura, umidade, presença e luz.', 'status': 'ok', 'qty': 8},
-        {'name': 'Kit Robótica Educacional', 'cat': 'eletronica', 'desc': 'Chassi robô 2WD/4WD, motores DC, drivers L298N, sensores ultrassônico.', 'status': 'unavail', 'qty': 3},
-        {'name': 'Osciloscópio Digital 50MHz', 'cat': 'eletronica', 'desc': '2 canais, amostragem 1GSa/s, 7" colorido. Ideal para análise de sinais.', 'status': 'ok', 'qty': 2},
-        {'name': 'Filamento PLA 1.75mm', 'cat': 'insumo', 'desc': 'Bobinas de 1kg em diversas cores. Compatível com todas as impressoras do lab.', 'status': 'ok', 'qty': 15},
-        {'name': 'Folha MDF 3mm', 'cat': 'insumo', 'desc': 'Chapas 30×20cm para uso na cortadora laser. Estoque reabastecido semanalmente.', 'status': 'ok', 'qty': 30},
-        {'name': 'Componentes SMD Sortidos', 'cat': 'insumo', 'desc': 'Resistores, capacitores, LEDs, transistores e CIs em embalagens organizadas.', 'status': 'busy', 'qty': 5},
-        {'name': 'Estação de Solda Hakko', 'cat': 'eletronica', 'desc': 'Temperatura ajustável 200–480°C, ponteiras variadas, suporte e esponja inclusos.', 'status': 'ok', 'qty': 6},
-    ]
-
-    print("\n📦 Sincronizando inventário com o banco de dados...")
-    
-    novos_itens = 0
-    for item in inv_data:
-        # Verifica se o item já existe para evitar duplicados ao rodar o comando várias vezes
-        if not ItemInventario.query.filter_by(nome=item['name']).first():
-            novo = ItemInventario(
-                nome=item['name'],
-                categoria=item['cat'],
-                descricao=item['desc'],
-                quantidade=item['qty'],
-                status=item['status']
-            )
-            db.session.add(novo)
-            novos_itens += 1
-    
-    db.session.commit()
-    print(f"✅ Concluído! {novos_itens} itens adicionados com sucesso.")
+@app.route("/cron")
+def cron():
+    return "OK", 200
 
 @app.route('/inventario/editar/<int:item_id>', methods=['POST'])
 @login_required
