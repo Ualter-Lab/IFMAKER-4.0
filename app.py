@@ -570,7 +570,7 @@ def salvar_inventario_em_lote():
 
 @app.route('/remover_inventario/<int:item_id>', methods=['POST'])
 def remover_inventario(item_id):
-    item = ItemInventario.query.get_or_404(item_id)
+    item = ItemInventario.query.get(item_id)
     db.session.delete(item)
     db.session.commit()
     return redirect(url_for('gerenciar_inventario'))
