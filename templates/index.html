@@ -2798,95 +2798,102 @@
       </div>
 
     </div>
+<div class="card card-padded" style="margin-top: 20px;">
+  <h3 style="margin-bottom: 20px;">Gerenciar Inventário</h3>
 
-    <div class="card card-padded" style="margin-top: 20px;">
-      <h3 style="margin-bottom: 20px;">Gerenciar Inventário</h3>
-
-      <div
-        style="background: var(--bg-subtle); padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border);">
-        <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 14px;">Adicionar Novo Item</h4>
-        <form action="{{ url_for('adicionar_inventario') }}" method="POST"
-          style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
-          <div style="flex: 2; min-width: 150px;">
-            <label style="font-size: 11px; display: block; margin-bottom: 4px;">Nome do Item</label>
-            <input type="text" name="nome" placeholder="Ex: Projetor" class="form-control"
-              style="padding: 5px; width: 100%;" required>
-          </div>
-          <div style="flex: 1; min-width: 80px;">
-            <label style="font-size: 11px; display: block; margin-bottom: 4px;">Qtd</label>
-            <input type="number" name="quantidade" value="1" min="0" class="form-control"
-              style="padding: 5px; width: 100%;" required>
-          </div>
-          <div style="flex: 3; min-width: 200px;">
-            <label style="font-size: 11px; display: block; margin-bottom: 4px;">Descrição</label>
-            <input type="text" name="descricao" placeholder="Ex: Sala de reuniões Bloco A" class="form-control"
-              style="padding: 5px; width: 100%;">
-          </div>
-          <div style="flex: 1; min-width: 120px;">
-            <label style="font-size: 11px; display: block; margin-bottom: 4px;">Status</label>
-            <select name="status" class="form-control" style="padding: 5px; width: 100%;">
-              <option value="ok">Disponível</option>
-              <option value="busy">Em Uso</option>
-              <option value="unavail">Indisponível</option>
-            </select>
-          </div>
-          <div style="flex: 1; min-width: 140px;">
-            <label style="font-size: 11px; display: block; margin-bottom: 4px;">Categoria</label>
-            <select name="categoria" class="form-control" style="padding: 5px; width: 100%;" required>
-              {% for cat in categorias_equipamento %}
-              <option value="{{ cat.slug }}">{{ cat.nome }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <button type="submit" class="btn-primary"
-            style="padding: 7px 15px; font-size: 12px; height: 32px;">Adicionar</button>
-        </form>
+  <div style="background: var(--bg-subtle); padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border);">
+    <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 14px;">Adicionar Novo Item</h4>
+    <form action="{{ url_for('adicionar_inventario') }}" method="POST" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+      <div style="flex: 2; min-width: 150px;">
+        <label style="font-size: 11px; display: block; margin-bottom: 4px;">Nome do Item</label>
+        <input type="text" name="nome" placeholder="Ex: Projetor" class="form-control" style="padding: 5px; width: 100%;" required>
       </div>
+      <div style="flex: 1; min-width: 80px;">
+        <label style="font-size: 11px; display: block; margin-bottom: 4px;">Qtd</label>
+        <input type="number" name="quantidade" value="1" min="0" class="form-control" style="padding: 5px; width: 100%;" required>
+      </div>
+      <div style="flex: 3; min-width: 200px;">
+        <label style="font-size: 11px; display: block; margin-bottom: 4px;">Descrição</label>
+        <input type="text" name="descricao" placeholder="Ex: Sala de reuniões Bloco A" class="form-control" style="padding: 5px; width: 100%;">
+      </div>
+      <div style="flex: 1; min-width: 120px;">
+        <label style="font-size: 11px; display: block; margin-bottom: 4px;">Status</label>
+        <select name="status" class="form-control" style="padding: 5px; width: 100%;">
+          <option value="ok">Disponível</option>
+          <option value="busy">Em Uso</option>
+          <option value="unavail">Indisponível</option>
+        </select>
+      </div>
+      <div style="flex: 1; min-width: 140px;">
+        <label style="font-size: 11px; display: block; margin-bottom: 4px;">Categoria</label>
+        <select name="categoria" class="form-control" style="padding: 5px; width: 100%;" required>
+          {% for cat in categorias_equipamento %}
+          <option value="{{ cat.slug }}">{{ cat.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn-primary" style="padding: 7px 15px; font-size: 12px; height: 32px;">Adicionar</button>
+    </form>
+  </div>
 
-      <div class="schedule-wrapper">
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-          <thead>
-            <tr style="background: var(--bg-subtle); text-align: left;">
-              <th style="padding: 12px;">Item</th>
-              <th style="padding: 12px;">Qtd</th>
-              <th style="padding: 12px;">Descrição</th>
-              <th style="padding: 12px;">Status</th>
-              <th style="padding: 12px;">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in inventario %}
-            <tr style="border-bottom: 1px solid var(--border);">
-              <form action="{{ url_for('editar_inventario', item_id=item.id) }}" method="POST">
-                <td style="padding: 10px;">
-                  <input type="text" name="nome" value="{{ item.nome }}" class="form-control" style="padding: 5px;">
-                </td>
-                <td style="padding: 10px; width: 80px;">
-                  <input type="number" name="quantidade" value="{{ item.quantidade }}" class="form-control"
-                    style="padding: 5px;">
-                </td>
-                <td style="padding: 10px;"> <input type="text" name="descricao" value="{{ item.descricao or '' }}"
-                    class="form-control" style="padding: 5px; width: 100%;" placeholder="Sem descrição">
-                </td>
-                <td style="padding: 10px;">
-                  <select name="status" class="form-control" style="padding: 5px;">
-                    <option value="ok" {% if item.status=='ok' %}selected{% endif %}>Disponível</option>
-                    <option value="busy" {% if item.status=='busy' %}selected{% endif %}>Em Uso</option>
-                    <option value="unavail" {% if item.status=='unavail' %}selected{% endif %}>Indisponível</option>
-                  </select>
-                </td>
-                <td style="padding: 10px;">
-                  <button type="submit" class="btn-primary" style="padding: 5px 12px; font-size: 11px;">Salvar</button>
-                </td>
-                <input type="hidden" name="categoria" value="{{ item.categoria }}">
+  <!-- FORM GLOBAL PARA SALVAR MÚLTIPLOS ITENS -->
+  <form action="{{ url_for('salvar_inventario_em_lote') }}" method="POST">
+    <div class="schedule-wrapper">
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr style="background: var(--bg-subtle); text-align: left;">
+            <th style="padding: 12px;">Item</th>
+            <th style="padding: 12px;">Qtd</th>
+            <th style="padding: 12px;">Descrição</th>
+            <th style="padding: 12px;">Status</th>
+            <th style="padding: 12px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in inventario %}
+          <tr style="border-bottom: 1px solid var(--border);">
+            <input type="hidden" name="item_ids[]" value="{{ item.id }}">
+            
+            <td style="padding: 10px;">
+              <input type="text" name="nomes[]" value="{{ item.nome }}" class="form-control" style="padding: 5px;">
+            </td>
+            <td style="padding: 10px; width: 80px;">
+              <input type="number" name="quantidades[]" value="{{ item.quantidade }}" class="form-control" style="padding: 5px;">
+            </td>
+            <td style="padding: 10px;">
+              <input type="text" name="descricoes[]" value="{{ item.descricao or '' }}" class="form-control" style="padding: 5px; width: 100%;" placeholder="Sem descrição">
+            </td>
+            <td style="padding: 10px;">
+              <select name="status[]" class="form-control" style="padding: 5px;">
+                <option value="ok" {% if item.status=='ok' %}selected{% endif %}>Disponível</option>
+                <option value="busy" {% if item.status=='busy' %}selected{% endif %}>Em Uso</option>
+                <option value="unavail" {% if item.status=='unavail' %}selected{% endif %}>Indisponível</option>
+              </select>
+            </td>
+            <td style="padding: 10px; display: flex; gap: 5px;">
+              <button type="submit" class="btn-primary" style="padding: 5px 12px; font-size: 11px;">Salvar</button>
+              
+              <!-- BOTÃO REMOVER (form separado) -->
+              <form action="{{ url_for('remover_inventario', item_id=item.id) }}" method="POST" style="display: inline;">
+                <button type="submit" class="btn-danger" onclick="return confirm('Remover item?')" style="padding: 5px 12px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                  Remover
+                </button>
               </form>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    {% endif %} {% endif %}
+
+    <!-- BOTÃO SALVAR TUDO NO FIM -->
+    <div style="margin-top: 15px;">
+      <button type="submit" class="btn-primary" style="padding: 10px 20px; font-size: 14px;">
+        💾 Salvar Todas as Alterações
+      </button>
+    </div>
+  </form>
+</div>
   </section>
 
   <footer>
