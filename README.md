@@ -89,7 +89,6 @@ Monitor voluntário não é um perfil. É um `monitor` com `is_voluntario = True
 | Escala de monitoria (exibição) | Pronto |
 | Edição da escala pela interface | Não implementado. Os horários são inseridos direto no banco |
 | Recuperação de senha | Não implementado |
-| Migrações de banco | Não implementado |
 
 ## Tecnologias
 
